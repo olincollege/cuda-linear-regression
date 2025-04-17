@@ -1,5 +1,6 @@
-typedef struct
-{
+#pragma once
+
+typedef struct {
     int height;
     int width;
     float *elements; // height x width
