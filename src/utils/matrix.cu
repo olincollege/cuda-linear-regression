@@ -1,10 +1,7 @@
-typedef struct
-{
-    int height;
-    int width;
-    float *elements; // height x width
+#include <cuda_runtime.h>
 
-} Matrix;
+#include <matrix.hpp>
 
-void free_matrix(Matrix matrix){}
-void init_matrix(){}
+Matrix* init_matrix_host(int num_rows, int num_cols, float value) {}
+
+void free_matrix_host(Matrix* mat);
