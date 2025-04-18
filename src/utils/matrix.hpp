@@ -1,31 +1,71 @@
 #pragma once
 
 typedef struct {
-    int height;
-    int width;
-    float *elements; // height x width
+    int rows;
+    int cols;
+    float* elements; // height x width
 
 } Matrix;
 
 /**
- * Frees the memory allocated for a matrix.
+ * Create a new matrix of specified dimensions with a specific value on the host.
+ * 
+ * Dynamically allocates the matrix on the host stack. Caller is responsible for 
+ * freeing.
+ *
+ * @param num_rows Number of rows in the matrix
+ * @param num_cols Number of columbs in the matrix
+ * @param value Value to assign to every element in the matrix.
+ * @return Pointer to the dynamically allocated matrix.
+ */
+Matrix* init_matrix_host(int num_rows, int num_cols, float value);
+
+/**
+ * Frees the memory allocated for a matrix on host.
+ * 
+ * Frees both the struct and elements array.
  *
  * @param mat Pointer to the Matrix whose memory should be released.
  */
-void free_matrix(Matrix* mat);
+void free_matrix_host(Matrix* mat);
 
 /**
- * Initializes an existing matrix with a specific value.
+ * Frees the memory allocated for a matrix on device.
+ * 
+ * Frees both the struct and elements array.
  *
- * @param mat Pointer to the Matrix to initialize.
- * @param value Value to assign to every element in the matrix.
+ * @param mat Pointer to the Matrix whose memory should be released.
  */
-void init_matrix(Matrix* mat, float value);
+void free_matrix_device(Matrix* mat);
+
+/**
+ * Copy a matrix from the host memory to device memory.
+ * 
+ * Dynamically allocates memory on device. Caller is responsible for freeing
+ * matrix on GPU.
+ * 
+ * @param host_matrix Pointer to matrix on host
+ * @return Pointer to matrix location on device.
+ */
+Matrix* copy_matrix_host_to_device(Matrix* host_matrix);
+
+/**
+ * Copy a matrix from the gpu memory to host memory.
+ * 
+ * Dynamically allocates memory on host. Caller is responsible for freeing
+ * matrix on GPU.
+ * 
+ * @param device_matrix Pointer to matrix on device
+ * @return Pointer to matrix location on host.
+ */
+Matrix* copy_matrix_device_to_host(Matrix* device_matrix);
 
 /**
  * Loads a matrix from a CSV file.
  *
  * The CSV file should contain numeric values separated by commas, with one row per line.
+ * Creates the matrix on host and dynamically allocates memory. Caller is responsible
+ * for freeing.
  *
  * @param filename Path to the CSV file.
  * @return Pointer to a newly allocated Matrix containing the parsed data.
