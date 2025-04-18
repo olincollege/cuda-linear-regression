@@ -8,32 +8,52 @@ typedef struct {
 } Matrix;
 
 /**
- * Create a new matrix of specified dimensions with a specific value on the
- * host.
+ * Print an error message and exit with a failure status code.
+ *
+ * Upon an error, print an error message with a desired prefix. The prefix
+ * error_msg should describe the context in which the error occurred, followed
+ * by a more specific message corresponding to errno set by whatever function or
+ * system call that encountered the error. This function exits the program and
+ * thus does not return.
+ *
+ * @param error_msg The error message to print.
+ */
+void host_error_and_exit(const char* error_msg);
+
+/**
+ * Check if cuda errored and print message if so
+ *
+ * If err isn't cudaSuccess, print error message and exit.
+ * The function won't return if this is the case.
+ *
+ * @param error_msg The error message to print if errored
+ * @param err Return from cuda function
+ */
+void check_device_error(const char* error_msg, cudaError_t err);
+
+/**
+ * Create new matrix with uninitialized values on host.
  *
  * Dynamically allocates the matrix on the host stack. Caller is responsible for
  * freeing.
  *
  * @param num_rows Number of rows in the matrix
  * @param num_cols Number of columbs in the matrix
- * @param value Value to assign to every element in the matrix.
  * @return Pointer to the dynamically allocated matrix.
  */
-Matrix* init_matrix_host(int num_rows, int num_cols, float value);
+Matrix* create_matrix_host(int num_rows, int num_cols);
 
 /**
- * Create a new matrix of specified dimensions with a specific value on the
- * device.
+ * Create new matrix with uninitialized values on device.
  *
- * Dynamically allocates the matrix on the device stack. Caller is responsible for
- * freeing.
+ * Dynamically allocates the matrix on the device stack. Caller is responsible
+ * for freeing.
  *
  * @param num_rows Number of rows in the matrix
  * @param num_cols Number of columbs in the matrix
- * @param value Value to assign to every element in the matrix.
  * @return Pointer to the dynamically allocated matrix.
  */
-Matrix* init_matrix_device(int num_rows, int num_cols, float value);
+Matrix* create_matrix_device(int num_rows, int num_cols);
 
 /**
  * Frees the memory allocated for a matrix on host.
