@@ -21,18 +21,16 @@ Matrix* create_matrix_host(int num_rows, int num_cols) {
   Matrix* mat = (Matrix*)malloc(sizeof(Matrix));
 
   if (mat == NULL) {
-    host_error_and_exit("Couldn't allocate host matrix struct space");
+    host_error_and_exit("Allocating host matrix struct");
   }
 
   mat->rows = num_rows;
   mat->cols = num_cols;
 
-  size_t num_elements = (size_t)(num_rows * num_cols);
-
   mat->elements = (float*)malloc(sizeof(float) * (num_rows * num_cols));
 
   if (mat->elements == NULL) {
-    host_error_and_exit("Couldn't allocate matrix array space");
+    host_error_and_exit("Allocating elements array");
   }
   return mat;
 }
@@ -47,7 +45,7 @@ Matrix* create_matrix_device(int num_rows, int num_cols) {
   // Then create the memory for the elements on the device with
   // a pointer on host
   float* d_elems;
-  check_device_error("alloc elements",
+  check_device_error("Allocating elements array",
                      cudaMalloc(&d_elems, sizeof(float) * num_rows * num_cols));
 
   // Then create the whole struct on host
@@ -58,18 +56,58 @@ Matrix* create_matrix_device(int num_rows, int num_cols) {
 
   // Finally move the whole struct to device
   check_device_error(
-      "copy struct to device",
+      "Copying struct to device",
       cudaMemcpy(d_mat, &h_mat, sizeof(Matrix), cudaMemcpyHostToDevice));
 
   return d_mat;
 }
 
-void free_matrix_host(Matrix* mat) {}
+void free_matrix_host(Matrix* h_mat) {
+  free(h_mat->elements);
+  free(h_mat);
+}
 
-void free_matrix_device(Matrix* mat) {}
+void free_matrix_device(Matrix* d_mat) {
+  // First, copy the struct back to host so we can read the pointers
+  Matrix h_mat;
+  check_device_error(
+      "Copy struct to host",
+      cudaMemcpy(&h_mat, d_mat, sizeof(Matrix), cudaMemcpyDeviceToHost));
 
-Matrix* copy_matrix_host_to_device(Matrix* host_matrix) {}
+  check_device_error("Free elements", cudaFree(h_mat.elements));
+  check_device_error("Free struct", cudaFree(d_mat));
+}
 
-Matrix* copy_matrix_device_to_host(Matrix* device_matrix) {}
+Matrix* copy_matrix_host_to_device(Matrix* h_mat) {
+  Matrix* d_mat = create_matrix_device(h_mat->rows, h_mat->cols);
+  check_device_error("Copy elements to device",
+                     cudaMemcpy(d_mat->elements, h_mat->elements,
+                                sizeof(float) * (h_mat->rows * h_mat->cols),
+                                cudaMemcpyHostToDevice));
+
+  return d_mat;
+}
+
+Matrix* copy_matrix_device_to_host(Matrix* d_mat) {
+  Matrix* h_mat = (Matrix*)malloc(sizeof(Matrix));
+  if (h_mat == NULL) {
+    host_error_and_exit("Allocate memory for matrix struct on host");
+  }
+  check_device_error(
+      "Copy struct to host",
+      cudaMemcpy(h_mat, d_mat, sizeof(Matrix), cudaMemcpyDeviceToHost));
+
+  float* elements = (float*)malloc(sizeof(float) * h_mat->rows * h_mat->cols);
+  if (elements == NULL) {
+    host_error_and_exit("Allocate memory for elements on host");
+  }
+
+  check_device_error("Copy elements to host",
+                     cudaMemcpy(elements, h_mat->elements,
+                                sizeof(float) * (h_mat->rows * h_mat->cols),
+                                cudaMemcpyDeviceToHost));
+  h_mat->elements = elements;
+  return h_mat;
+}
 
 Matrix* create_matrix_from_csv(const char* filename) {}

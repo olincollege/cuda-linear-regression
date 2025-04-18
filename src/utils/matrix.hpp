@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cuda_runtime.h>
+
 typedef struct {
   int rows;
   int cols;
@@ -34,7 +36,7 @@ void check_device_error(const char* error_msg, cudaError_t err);
 /**
  * Create new matrix with uninitialized values on host.
  *
- * Dynamically allocates the matrix on the host stack. Caller is responsible for
+ * Dynamically allocates the matrix on the host heap. Caller is responsible for
  * freeing.
  *
  * @param num_rows Number of rows in the matrix
@@ -46,7 +48,7 @@ Matrix* create_matrix_host(int num_rows, int num_cols);
 /**
  * Create new matrix with uninitialized values on device.
  *
- * Dynamically allocates the matrix on the device stack. Caller is responsible
+ * Dynamically allocates the matrix on the device heap. Caller is responsible
  * for freeing.
  *
  * @param num_rows Number of rows in the matrix
@@ -60,18 +62,18 @@ Matrix* create_matrix_device(int num_rows, int num_cols);
  *
  * Frees both the struct and elements array.
  *
- * @param mat Pointer to the Matrix whose memory should be released.
+ * @param h_mat Pointer to the Matrix whose memory should be released.
  */
-void free_matrix_host(Matrix* mat);
+void free_matrix_host(Matrix* h_mat);
 
 /**
  * Frees the memory allocated for a matrix on device.
  *
  * Frees both the struct and elements array.
  *
- * @param mat Pointer to the Matrix whose memory should be released.
+ * @param d_mat Pointer to the Matrix whose memory should be released.
  */
-void free_matrix_device(Matrix* mat);
+void free_matrix_device(Matrix* d_mat);
 
 /**
  * Copy a matrix from the host memory to device memory.
@@ -79,10 +81,10 @@ void free_matrix_device(Matrix* mat);
  * Dynamically allocates memory on device. Caller is responsible for freeing
  * matrix on GPU.
  *
- * @param host_matrix Pointer to matrix on host
+ * @param h_mat Pointer to matrix on host
  * @return Pointer to matrix location on device.
  */
-Matrix* copy_matrix_host_to_device(Matrix* host_matrix);
+Matrix* copy_matrix_host_to_device(Matrix* h_mat);
 
 /**
  * Copy a matrix from the gpu memory to host memory.
@@ -90,10 +92,10 @@ Matrix* copy_matrix_host_to_device(Matrix* host_matrix);
  * Dynamically allocates memory on host. Caller is responsible for freeing
  * matrix on GPU.
  *
- * @param device_matrix Pointer to matrix on device
+ * @param d_mat Pointer to matrix on device
  * @return Pointer to matrix location on host.
  */
-Matrix* copy_matrix_device_to_host(Matrix* device_matrix);
+Matrix* copy_matrix_device_to_host(Matrix* d_mat);
 
 /**
  * Loads a matrix from a CSV file.
