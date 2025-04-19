@@ -5,8 +5,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-conversion")
 
 list(APPEND CMAKE_CTEST_ARGUMENTS --verbose)
 
-# If you need to test a library called foo, use lines like the following.
-# add_executable(test_foo test_foo.c)
+add_executable(test_cpu_matrix test_cpu_matrix.cpp)
 target_link_libraries(test_cpu_matrix
     PRIVATE cpu_matrix
     PUBLIC ${CRITERION}
@@ -15,6 +14,8 @@ add_test(
     NAME test_cpu_matrix
     COMMAND test_cpu_matrix ${CRITERION_FLAGS}
 )
+
+add_executable(test_gpu_matrix test_gpu_matrix.cpp)
 target_link_libraries(test_gpu_matrix
     PRIVATE gpu_matrix
     PUBLIC ${CRITERION}
@@ -23,6 +24,8 @@ add_test(
     NAME test_gpu_matrix
     COMMAND test_gpu_matrix ${CRITERION_FLAGS}
 )
+
+add_executable(test_linear_regression test_linear_regression.cpp)
 target_link_libraries(test_linear_regression
     PRIVATE linear_regression
     PUBLIC ${CRITERION}
@@ -31,6 +34,8 @@ add_test(
     NAME test_linear_regression
     COMMAND test_linear_regression ${CRITERION_FLAGS}
 )
+
+add_executable(test_matrix test_matrix.cpp)
 target_link_libraries(test_matrix
     PRIVATE matrix
     PUBLIC ${CRITERION}
