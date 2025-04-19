@@ -84,7 +84,7 @@ void free_matrix_device(Matrix* d_mat);
  * @param h_mat Pointer to matrix on host
  * @return Pointer to matrix location on device.
  */
-Matrix* copy_matrix_host_to_device(Matrix* h_mat);
+Matrix* copy_matrix_host_to_device(const Matrix* h_mat);
 
 /**
  * Copy a matrix from the gpu memory to host memory.
@@ -95,7 +95,7 @@ Matrix* copy_matrix_host_to_device(Matrix* h_mat);
  * @param d_mat Pointer to matrix on device
  * @return Pointer to matrix location on host.
  */
-Matrix* copy_matrix_device_to_host(Matrix* d_mat);
+Matrix* copy_matrix_device_to_host(const Matrix* d_mat);
 
 /**
  * Loads a matrix from a CSV file.
