@@ -1,6 +1,7 @@
 #include <cuda_runtime.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "matrix.hpp"
 
@@ -17,7 +18,7 @@ void check_device_error(const char* error_msg, cudaError_t err) {
   }
 }
 
-Matrix* create_matrix_host(int num_rows, int num_cols) {
+Matrix* create_matrix_host(size_t num_rows, size_t num_cols) {
   Matrix* mat = (Matrix*)malloc(sizeof(Matrix));
 
   if (mat == NULL) {
@@ -35,7 +36,7 @@ Matrix* create_matrix_host(int num_rows, int num_cols) {
   return mat;
 }
 
-Matrix* create_matrix_device(int num_rows, int num_cols) {
+Matrix* create_matrix_device(size_t num_rows, size_t num_cols) {
   // First we create the memory for matrix struct on the device
   // with a pointer to it on host
   Matrix* d_mat;
@@ -134,4 +135,76 @@ Matrix* copy_matrix_device_to_host(const Matrix* d_mat) {
   return h_mat;
 }
 
-Matrix* create_matrix_from_csv(const char* filename) {}
+Matrix* create_matrix_from_csv(const char* filename) {
+  Matrix* h_mat = create_matrix_host(100, 100);
+  size_t elements_allocated = 10000;
+  size_t rows = 0;
+  size_t first_cols = 0;
+  size_t cols = 0;
+  size_t element_num = 0;
+  FILE* input = fopen(filename, "r");
+  if (input == NULL) {
+    host_error_and_exit("Opening csv stream");
+  }
+
+  size_t buffer_size = 2048;
+  ssize_t num_read = 0;
+  char* buffer = (char*)malloc(buffer_size);
+  if (buffer == NULL) {
+    host_error_and_exit("Opening csv stream buffer");
+  }
+  while ((num_read = getline(&buffer, &buffer_size, input)) != -1) {
+    if (num_read <= 1) {
+      continue;
+    }
+    rows++;
+    cols = 0;
+    char* token = strtok(buffer, ",\r\n");
+
+    while (token != NULL) {
+      if (token[0] != '\0') {
+        if (element_num >= elements_allocated) {
+          h_mat->elements = (float*)realloc(
+              (void*)h_mat->elements, elements_allocated * 2 * sizeof(float));
+          if (h_mat->elements == NULL) {
+            free(buffer);
+            host_error_and_exit("Reallocate elements");
+          }
+          elements_allocated = elements_allocated * 2;
+        }
+        h_mat->elements[element_num] = (float)atof(token);
+        element_num++;
+
+        if (rows == 1) {
+          first_cols++;
+        }
+        cols++;
+      }
+      token = strtok(NULL, ",\r\n");
+    }
+    if (cols != first_cols) {
+      free(buffer);
+      return NULL;
+    }
+  }
+  if (ferror(input)) {
+    free(buffer);
+    host_error_and_exit("Reading csv");
+  }
+
+  if (rows == 0 || cols == 0) {
+    h_mat->elements = (float*)realloc((void*)h_mat->elements, sizeof(float));
+  } else {
+    h_mat->elements =
+        (float*)realloc((void*)h_mat->elements, element_num * sizeof(float));
+  }
+  if (h_mat->elements == NULL) {
+    free(buffer);
+    host_error_and_exit("Reallocate elements");
+  }
+  h_mat->rows = rows;
+  h_mat->cols = cols;
+  free(buffer);
+  fclose(input);
+  return h_mat;
+}
