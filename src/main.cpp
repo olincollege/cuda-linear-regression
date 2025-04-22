@@ -5,16 +5,18 @@
 
 int main(int argc, char** argv) {
   std::cout << "Cuda‑Linear‑Regression demo\n";
-  // TODO: load data, build Matrix objects, call cpu_regression / gpu_regression
-  // …
-  Matrix* h_mat = create_matrix_host(3, 4);
-  for (int i = 0; i < 12; i++) {
-    h_mat->elements[i] = (float)(i + 1);
-  }
-  Matrix* d_mat = copy_matrix_host_to_device(h_mat);
-  Matrix* new_h_mat = copy_matrix_device_to_host(d_mat);
-  free_matrix_host(h_mat);
-  free_matrix_host(new_h_mat);
-  free_matrix_device(d_mat);
+  Matrix* mat = create_matrix_from_csv(
+      "/home/akurtz/cuda-neural-network/test/data/1000x1000.csv");
+
+  // for (size_t i = 0; i < mat->rows * mat->cols; i++) {
+  //   printf("%f, ", mat->elements[i]);
+  //   if (((i + 1) % 101) == 0) {
+  //     puts("");
+  //   }
+  // }
+  // puts("");
+  printf("(%zu, %zu)\n", mat->rows, mat->cols);
+  printf("%p\n", mat);
+  free_matrix_host(mat);
   return 0;
 }

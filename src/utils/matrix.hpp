@@ -3,8 +3,8 @@
 #include <cuda_runtime.h>
 
 typedef struct {
-  int rows;
-  int cols;
+  size_t rows;
+  size_t cols;
   float* elements;  // height x width
 
 } Matrix;
@@ -43,7 +43,7 @@ void check_device_error(const char* error_msg, cudaError_t err);
  * @param num_cols Number of columbs in the matrix
  * @return Pointer to the dynamically allocated matrix.
  */
-Matrix* create_matrix_host(int num_rows, int num_cols);
+Matrix* create_matrix_host(size_t num_rows, size_t num_cols);
 
 /**
  * Create new matrix with uninitialized values on device.
@@ -55,7 +55,7 @@ Matrix* create_matrix_host(int num_rows, int num_cols);
  * @param num_cols Number of columbs in the matrix
  * @return Pointer to the dynamically allocated matrix.
  */
-Matrix* create_matrix_device(int num_rows, int num_cols);
+Matrix* create_matrix_device(size_t num_rows, size_t num_cols);
 
 /**
  * Frees the memory allocated for a matrix on host.
@@ -98,7 +98,7 @@ Matrix* copy_matrix_host_to_device(const Matrix* h_mat);
 Matrix* copy_matrix_device_to_host(const Matrix* d_mat);
 
 /**
- * Loads a matrix from a CSV file.
+ * Loads a matrix from a CSV file on host.
  *
  * The CSV file should contain numeric values separated by commas, with one row
  * per line. Creates the matrix on host and dynamically allocates memory. Caller
