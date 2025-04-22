@@ -15,7 +15,7 @@
  * @param right_mat The right matrix in multiplication.
  * @return pointer to result matrix or NULL if incompatible matrices
  */
-Matrix* gpu_matrix_multiply(Matrix* left_mat, Matrix* right_mat);
+Matrix* gpu_matrix_multiply(const Matrix* left_mat, const Matrix* right_mat);
 
 /**
  * Kernel to run part of matrix multiplication.
@@ -24,7 +24,7 @@ Matrix* gpu_matrix_multiply(Matrix* left_mat, Matrix* right_mat);
  * @param right_mat Pointer to right matrix in multiplication.
  * @param result Pointer to result matrix in multiplication.
  */
-__global__ void matrix_multiply_kernel(Matrix* left_mat, Matrix* right_mat,
+__global__ void matrix_multiply_kernel(const Matrix* left_mat, const Matrix* right_mat,
                                        Matrix* result);
 
 /**
@@ -36,7 +36,7 @@ __global__ void matrix_multiply_kernel(Matrix* left_mat, Matrix* right_mat,
  * @param mat Pointer to the input matrix.
  * @return Pointer to the transposed matrix.
  */
-Matrix* gpu_matrix_transpose(Matrix* mat);
+Matrix* gpu_matrix_transpose(const Matrix* mat);
 
 /**
  * Kernel to perform matrix transposition.
@@ -44,7 +44,7 @@ Matrix* gpu_matrix_transpose(Matrix* mat);
  * @param input Pointer to the input matrix.
  * @param output Pointer to the transposed matrix.
  */
-__global__ void matrix_transpose_kernel(Matrix* input, Matrix* output);
+__global__ void matrix_transpose_kernel(const Matrix* input, Matrix* output);
 
 /**
  * Compute the inverse of a matrix using the GPU.
@@ -55,7 +55,7 @@ __global__ void matrix_transpose_kernel(Matrix* input, Matrix* output);
  * @param mat Pointer to the matrix to invert.
  * @return Pointer to the inverted matrix or NULL if not invertible.
  */
-Matrix* gpu_matrix_inverse(Matrix* mat);
+Matrix* gpu_matrix_inverse(const Matrix* mat);
 
 /**
  * Kernel to assist in computing matrix inverse.
@@ -63,7 +63,7 @@ Matrix* gpu_matrix_inverse(Matrix* mat);
  * @param input Pointer to the input matrix.
  * @param output Pointer to the inverted matrix.
  */
-__global__ void matrix_inverse_kernel(Matrix* input, Matrix* output);
+__global__ void matrix_inverse_kernel(const Matrix* input, Matrix* output);
 
 /**
  * Multiply every element of a matrix by a scalar value on the GPU.
@@ -74,7 +74,7 @@ __global__ void matrix_inverse_kernel(Matrix* input, Matrix* output);
  * @param scalar The scalar value to multiply each element by.
  * @return Pointer to the scaled matrix.
  */
-Matrix* gpu_scalar_multiply(Matrix* mat, float scalar);
+Matrix* gpu_scalar_multiply(const Matrix* mat, const float scalar);
 
 /**
  * Kernel to perform element-wise scalar multiplication.
@@ -83,7 +83,7 @@ Matrix* gpu_scalar_multiply(Matrix* mat, float scalar);
  * @param scalar The scalar multiplier.
  * @param output Pointer to the result matrix.
  */
-__global__ void scalar_multiply_kernel(Matrix* input, float scalar,
+__global__ void scalar_multiply_kernel(const Matrix* input, const float scalar,
                                        Matrix* output);
 
 /**
@@ -96,7 +96,7 @@ __global__ void scalar_multiply_kernel(Matrix* input, float scalar,
  * @param mat_b Second matrix.
  * @return Pointer to the result matrix or NULL if dimensions mismatch.
  */
-Matrix* gpu_matrix_add(Matrix* mat_a, Matrix* mat_b);
+Matrix* gpu_matrix_add(const Matrix* mat_a, const Matrix* mat_b);
 
 /**
  * Kernel to perform element-wise matrix addition.
@@ -105,7 +105,7 @@ Matrix* gpu_matrix_add(Matrix* mat_a, Matrix* mat_b);
  * @param mat_b Second matrix.
  * @param result Output matrix containing the sum.
  */
-__global__ void matrix_add_kernel(Matrix* mat_a, Matrix* mat_b, Matrix* result);
+__global__ void matrix_add_kernel(const Matrix* mat_a, const Matrix* mat_b, Matrix* result);
 
 /**
  * Subtract one matrix from another element-wise using the GPU.
@@ -117,7 +117,7 @@ __global__ void matrix_add_kernel(Matrix* mat_a, Matrix* mat_b, Matrix* result);
  * @param mat_b Matrix to subtract.
  * @return Pointer to the result matrix or NULL if dimensions mismatch.
  */
-Matrix* gpu_matrix_subtract(Matrix* mat_a, Matrix* mat_b);
+Matrix* gpu_matrix_subtract(const Matrix* mat_a, const Matrix* mat_b);
 
 /**
  * Kernel to perform element-wise matrix subtraction.
@@ -126,5 +126,5 @@ Matrix* gpu_matrix_subtract(Matrix* mat_a, Matrix* mat_b);
  * @param mat_b Matrix to subtract.
  * @param result Output matrix containing the difference.
  */
-__global__ void matrix_subtract_kernel(Matrix* mat_a, Matrix* mat_b,
+__global__ void matrix_subtract_kernel(const Matrix* mat_a, const Matrix* mat_b,
                                        Matrix* result);
