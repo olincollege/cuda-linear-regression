@@ -1,7 +1,7 @@
-add_library(cpu_matrix cpu_matrix.cpp cpu_matrix.hpp)
+add_library(cpu_matrix cpu_matrix.c cpu_matrix.h)
 target_link_libraries(cpu_matrix PUBLIC matrix)
 
-add_library(gpu_matrix gpu_matrix.cu gpu_matrix.hpp)
+add_library(gpu_matrix gpu_matrix.cu gpu_matrix.h)
 target_link_libraries(gpu_matrix PUBLIC matrix)
 set_target_properties(gpu_matrix PROPERTIES LINKER_LANGUAGE CUDA)
 

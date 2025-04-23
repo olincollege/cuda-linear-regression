@@ -2,6 +2,10 @@
 
 #include <cuda_runtime.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
   size_t rows;
   size_t cols;
@@ -110,3 +114,7 @@ Matrix* copy_matrix_device_to_host(const Matrix* d_mat);
  * `free_matrix`.
  */
 Matrix* create_matrix_from_csv(const char* filename);
+
+#ifdef __cplusplus
+}
+#endif

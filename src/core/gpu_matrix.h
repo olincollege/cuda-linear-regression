@@ -2,7 +2,11 @@
 
 #include <cuda_runtime.h>
 
-#include "matrix.hpp"
+#include "matrix.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Multiply two matrices using the GPU.
@@ -24,8 +28,8 @@ Matrix* gpu_matrix_multiply(const Matrix* left_mat, const Matrix* right_mat);
  * @param right_mat Pointer to right matrix in multiplication.
  * @param result Pointer to result matrix in multiplication.
  */
-__global__ void matrix_multiply_kernel(const Matrix* left_mat, const Matrix* right_mat,
-                                       Matrix* result);
+__global__ void matrix_multiply_kernel(const Matrix* left_mat,
+                                       const Matrix* right_mat, Matrix* result);
 
 /**
  * Transpose a matrix using the GPU.
@@ -105,7 +109,8 @@ Matrix* gpu_matrix_add(const Matrix* mat_a, const Matrix* mat_b);
  * @param mat_b Second matrix.
  * @param result Output matrix containing the sum.
  */
-__global__ void matrix_add_kernel(const Matrix* mat_a, const Matrix* mat_b, Matrix* result);
+__global__ void matrix_add_kernel(const Matrix* mat_a, const Matrix* mat_b,
+                                  Matrix* result);
 
 /**
  * Subtract one matrix from another element-wise using the GPU.
@@ -128,3 +133,7 @@ Matrix* gpu_matrix_subtract(const Matrix* mat_a, const Matrix* mat_b);
  */
 __global__ void matrix_subtract_kernel(const Matrix* mat_a, const Matrix* mat_b,
                                        Matrix* result);
+
+#ifdef __cplusplus
+}
+#endif

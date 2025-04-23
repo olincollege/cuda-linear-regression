@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.22)
-project(CudaLinearRegression LANGUAGES CXX CUDA)
+project(CudaLinearRegression LANGUAGES C CUDA)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD 17)
 set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
-set(CMAKE_CUDA_ARCHITECTURES 52;61;75;86;89)
+set(CMAKE_CUDA_ARCHITECTURES 75)
 find_package(CUDAToolkit REQUIRED) 
 include_directories(SYSTEM ${CUDAToolkit_INCLUDE_DIRS})
 
@@ -25,7 +25,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wsign-conversion")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wunreachable-code")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wunused")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
-set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=-llvmlibc-*" )
+set(CMAKE_C_CLANG_TIDY "clang-tidy;-checks=-llvmlibc-*" )
 
 add_subdirectory(src)
 
