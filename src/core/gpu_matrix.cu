@@ -93,3 +93,95 @@ Matrix* gpu_matrix_transpose(const Matrix* mat) {
 
     return h_result;
 }
+
+__global__ void scalar_multiply_kernel(const Matrix* input, float scalar, Matrix* output) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int total_elements = input->rows * input->cols;
+
+    if (idx < total_elements) {
+        output->elements[idx] = input->elements[idx] * scalar;
+    }
+}
+
+Matrix* gpu_scalar_multiply(const Matrix* mat, float scalar) {
+    if (!mat) return nullptr;
+
+    Matrix* d_A = copy_matrix_host_to_device(mat);
+    Matrix* d_B = create_matrix_device(mat->rows, mat->cols);
+
+    int total_elements = mat->rows * mat->cols;
+    int threads_per_block = 256;
+    int blocks = (total_elements + threads_per_block - 1) / threads_per_block;
+
+    scalar_multiply_kernel<<<blocks, threads_per_block>>>(d_A, scalar, d_B);
+    check_device_error("Scalar Multiplication Kernel Launch Failed", cudaGetLastError());
+
+    Matrix* h_B = copy_matrix_device_to_host(d_B);
+    free_matrix_device(d_A);
+    free_matrix_device(d_B);
+
+    return h_B;
+}
+
+__global__ void matrix_add_kernel(const Matrix* mat_a, const Matrix* mat_b, Matrix* result) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int total_elements = mat_a->rows * mat_a->cols;
+
+    if (idx < total_elements) {
+        result->elements[idx] = mat_a->elements[idx] + mat_b->elements[idx];
+    }
+}
+
+Matrix* gpu_matrix_add(const Matrix* mat_a, const Matrix* mat_b) {
+    if (!mat_a || !mat_b || mat_a->rows != mat_b->rows || mat_a->cols != mat_b->cols) return nullptr;
+
+    Matrix* d_A = copy_matrix_host_to_device(mat_a);
+    Matrix* d_B = copy_matrix_host_to_device(mat_b);
+    Matrix* d_C = create_matrix_device(mat_a->rows, mat_a->cols);
+
+    int total_elements = mat_a->rows * mat_a->cols;
+    int threads_per_block = 256;
+    int blocks = (total_elements + threads_per_block - 1) / threads_per_block;
+
+    matrix_add_kernel<<<blocks, threads_per_block>>>(d_A, d_B, d_C);
+    check_device_error("Addition Kernel Launch Failed", cudaGetLastError());
+
+    Matrix* h_C = copy_matrix_device_to_host(d_C);
+    free_matrix_device(d_A);
+    free_matrix_device(d_B);
+    free_matrix_device(d_C);
+
+    return h_C;
+}
+
+
+__global__ void matrix_subtract_kernel(const Matrix* mat_a, const Matrix* mat_b, Matrix* result) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int total_elements = mat_a->rows * mat_a->cols;
+
+    if (idx < total_elements) {
+        result->elements[idx] = mat_a->elements[idx] - mat_b->elements[idx];
+    }
+}
+
+Matrix* gpu_matrix_subtract(const Matrix* mat_a, const Matrix* mat_b) {
+    if (!mat_a || !mat_b || mat_a->rows != mat_b->rows || mat_a->cols != mat_b->cols) return nullptr;
+
+    Matrix* d_A = copy_matrix_host_to_device(mat_a);
+    Matrix* d_B = copy_matrix_host_to_device(mat_b);
+    Matrix* d_C = create_matrix_device(mat_a->rows, mat_a->cols);
+
+    int total_elements = mat_a->rows * mat_a->cols;
+    int threads_per_block = 256;
+    int blocks = (total_elements + threads_per_block - 1) / threads_per_block;
+
+    matrix_subtract_kernel<<<blocks, threads_per_block>>>(d_A, d_B, d_C);
+    check_device_error("Addition Kernel Launch Failed", cudaGetLastError());
+
+    Matrix* h_C = copy_matrix_device_to_host(d_C);
+    free_matrix_device(d_A);
+    free_matrix_device(d_B);
+    free_matrix_device(d_C);
+
+    return h_C;
+}
