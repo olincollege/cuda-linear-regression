@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "matrix.hpp"
+#include "matrix.h"
 
 void host_error_and_exit(const char* error_msg) {
   perror(error_msg);

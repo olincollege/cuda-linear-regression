@@ -2,7 +2,7 @@
 
 #include <cuda_runtime.h>
 
-#include "matrix.hpp"
+#include "matrix.h"
 
 /**
  * Multiply two matrices using the GPU.

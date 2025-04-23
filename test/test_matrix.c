@@ -2,7 +2,7 @@
 #include <criterion/new/assert.h>
 #include <criterion/redirect.h>
 
-#include "matrix.hpp"
+#include "matrix.h"
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,cppcoreguidelines-pro-bounds-pointer-arithmetic)
 

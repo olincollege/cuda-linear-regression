@@ -1,6 +1,6 @@
 #pragma once
 
-#include "matrix.hpp"
+#include "matrix.h"
 
 /**
  * Multiply matrix a by matrix b on the CPU.

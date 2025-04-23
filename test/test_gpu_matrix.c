@@ -1,10 +1,6 @@
-#include <cassert>
-#include <iostream>
-#include "../utils/matrix.hpp"
-
 #include <criterion/criterion.h>
-#include "matrix.hpp"
-#include "gpu_matrix.hpp" 
+#include "matrix.h"
+#include "gpu_matrix.h" 
 
 // Test small-sized matrix multiplication on GPU
 Test(GPU_Matrix, Multiply_SmallMatrix) {

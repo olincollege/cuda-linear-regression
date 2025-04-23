@@ -1,4 +1,4 @@
-#include "matrix.hpp"
+#include "../utils/matrix.h"
 #include <stdio.h>
 #include <cuda_runtime.h>
 

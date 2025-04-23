@@ -1,4 +1,4 @@
-#include "../utils/matrix.hpp"
+#include "../utils/matrix.h"
 /** 
  * Perform linear regression on CPU using the Normal Equation.
  * This function computes the optimal weight matrix `W` for the linear regression model:

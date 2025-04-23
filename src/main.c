@@ -1,10 +1,10 @@
-#include <iostream>
+#include "stdio.h"
 
-#include "linear_regression.hpp"
-#include "matrix.hpp"
+#include "linear_regression.h"
+#include "matrix.h"
 
 int main(int argc, char** argv) {
-  std::cout << "Cuda‑Linear‑Regression demo\n";
+  printf("Cuda‑Linear‑Regression demo\n");
   Matrix* mat = create_matrix_from_csv(
       "/home/akurtz/cuda-neural-network/test/data/1000x1000.csv");
 
