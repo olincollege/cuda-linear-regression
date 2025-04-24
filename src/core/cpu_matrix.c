@@ -6,6 +6,45 @@
 
 const float ZERO_THRESH = (float)1e-7;
 
+Matrix* cpu_matrix_multiply(Matrix* left_mat, Matrix* right_mat) {
+  if (!left_mat || !right_mat || !left_mat->elements || !right_mat->elements)
+    return NULL;
+
+  if (left_mat->cols != right_mat->rows) return NULL;
+
+  Matrix* result = create_matrix_host(left_mat->rows, right_mat->cols);
+  if (!result) return NULL;
+
+  for (int i = 0; i < left_mat->rows; ++i) {
+    for (int j = 0; j < right_mat->cols; ++j) {
+      float sum = 0.0f;
+      for (int k = 0; k < left_mat->cols; ++k) {
+        sum += left_mat->elements[i * left_mat->cols + k] *
+               right_mat->elements[k * right_mat->cols + j];
+      }
+      result->elements[i * result->cols + j] = sum;
+    }
+  }
+
+  return result;
+}
+
+Matrix* cpu_matrix_transpose(Matrix* mat) {
+  if (!mat || !mat->elements) return NULL;
+
+  Matrix* transposed = create_matrix_host(mat->cols, mat->rows);
+  if (!transposed) return NULL;
+
+  for (int i = 0; i < mat->rows; ++i) {
+    for (int j = 0; j < mat->cols; ++j) {
+      transposed->elements[j * transposed->cols + i] =
+          mat->elements[i * mat->cols + j];
+    }
+  }
+
+  return transposed;
+}
+
 Matrix* cpu_matrix_inverse(Matrix* mat) {
   if (mat->cols != mat->rows) {
     return NULL;
@@ -83,4 +122,47 @@ Matrix* cpu_matrix_inverse(Matrix* mat) {
   }
   free_matrix_host(mat_c);
   return i_mat;
+}
+
+Matrix* cpu_scalar_multiply(Matrix* mat, float scalar) {
+  if (!mat || !mat->elements) return NULL;
+
+  Matrix* result = create_matrix_host(mat->rows, mat->cols);
+  if (!result) return NULL;
+
+  for (int i = 0; i < mat->rows * mat->cols; ++i) {
+    result->elements[i] = mat->elements[i] * scalar;
+  }
+
+  return result;
+}
+
+Matrix* cpu_matrix_add(Matrix* mat_a, Matrix* mat_b) {
+  if (!mat_a || !mat_b || !mat_a->elements || !mat_b->elements) return NULL;
+
+  if (mat_a->rows != mat_b->rows || mat_a->cols != mat_b->cols) return NULL;
+
+  Matrix* result = create_matrix_host(mat_a->rows, mat_a->cols);
+  if (!result) return NULL;
+
+  for (int i = 0; i < mat_a->rows * mat_a->cols; ++i) {
+    result->elements[i] = mat_a->elements[i] + mat_b->elements[i];
+  }
+
+  return result;
+}
+
+Matrix* cpu_matrix_subtract(Matrix* mat_a, Matrix* mat_b) {
+  if (!mat_a || !mat_b || !mat_a->elements || !mat_b->elements) return NULL;
+
+  if (mat_a->rows != mat_b->rows || mat_a->cols != mat_b->cols) return NULL;
+
+  Matrix* result = create_matrix_host(mat_a->rows, mat_a->cols);
+  if (!result) return NULL;
+
+  for (int i = 0; i < mat_a->rows * mat_a->cols; ++i) {
+    result->elements[i] = mat_a->elements[i] - mat_b->elements[i];
+  }
+
+  return result;
 }
