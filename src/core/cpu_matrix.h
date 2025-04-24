@@ -2,6 +2,8 @@
 
 #include "matrix.h"
 
+extern const float ZERO_THRESH;
+
 /**
  * Multiply matrix a by matrix b on the CPU.
  *
