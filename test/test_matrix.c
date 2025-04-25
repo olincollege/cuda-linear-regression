@@ -71,4 +71,73 @@ Test(copy_matrix, copies_elements_correctly) {
   free_matrix_host(new_h_mat);
   free_matrix_device(d_mat);
 }
+
+// Test elements of load a regular small CSV
+Test(load_matrix, small_CSV_elements) {
+  Matrix* loaded = create_matrix_from_csv("../../data/3x3_matrix.csv");
+  for (int i = 0; i < 9; i++) {
+    cr_assert(ieee_ulp_eq(flt, loaded->elements[i], (float)(i + 1), 3),
+              "%f expected but got %f", (float)(i + 1), loaded->elements[i]);
+  }
+  free_matrix_host(loaded);
+}
+
+// Test correct rows and columns of small matrix
+Test(load_matrix, small_CSV_size) {
+  Matrix* loaded = create_matrix_from_csv("../../data/3x3_matrix.csv");
+  cr_assert(eq(int, loaded->rows, 3), "3 expected but got %d rows",
+            loaded->rows);
+  cr_assert(eq(int, loaded->cols, 3), "3 expected but got %d cols",
+            loaded->cols);
+  free_matrix_host(loaded);
+}
+
+// Test elements of huge matrix
+Test(load_matrix, huge_csv_elements) {
+  Matrix* loaded = create_matrix_from_csv("../../data/1000x1000.csv");
+  for (int i = 0; i < (1000000); i++) {
+    cr_assert(ieee_ulp_eq(flt, loaded->elements[i], (float)(i), 3),
+              "%f expected but got %f", (float)(i), loaded->elements[i]);
+  }
+  free_matrix_host(loaded);
+}
+
+// Test correct rows and columns of huge matrix
+Test(load_matrix, huge_csv_size) {
+  Matrix* loaded = create_matrix_from_csv("../../data/1000x1000.csv");
+  cr_assert(eq(int, loaded->rows, 1000), "3 expected but got %d rows",
+            loaded->rows);
+  cr_assert(eq(int, loaded->cols, 1000), "3 expected but got %d cols",
+            loaded->cols);
+  free_matrix_host(loaded);
+}
+
+// Test unevenly sized Matrix is NULL
+Test(load_matrix, uneven_size) {
+  Matrix* loaded = create_matrix_from_csv("../../data/uneven_matrix.csv");
+  cr_assert(eq(ptr, loaded, NULL), "NULL expected but got %p", loaded);
+}
+
+// Test trailing commas read correclty
+Test(load_matrix, trailing_comma_elements) {
+  Matrix* loaded =
+      create_matrix_from_csv("../../data/3x3_matrix_ending_commas.csv");
+  for (int i = 0; i < 9; i++) {
+    cr_assert(ieee_ulp_eq(flt, loaded->elements[i], (float)(i + 1), 3),
+              "%f expected but got %f", (float)(i + 1), loaded->elements[i]);
+  }
+  free_matrix_host(loaded);
+}
+
+// Test correct rows and columns of small matrix
+Test(load_matrix, trailing_comma_size) {
+  Matrix* loaded =
+      create_matrix_from_csv("../../data/3x3_matrix_ending_commas.csv");
+  cr_assert(eq(int, loaded->rows, 3), "3 expected but got %d rows",
+            loaded->rows);
+  cr_assert(eq(int, loaded->cols, 3), "3 expected but got %d cols",
+            loaded->cols);
+  free_matrix_host(loaded);
+}
+
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,cppcoreguidelines-pro-bounds-pointer-arithmetic)

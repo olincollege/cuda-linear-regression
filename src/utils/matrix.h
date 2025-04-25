@@ -106,7 +106,8 @@ Matrix* copy_matrix_device_to_host(const Matrix* d_mat);
  *
  * The CSV file should contain numeric values separated by commas, with one row
  * per line. Creates the matrix on host and dynamically allocates memory. Caller
- * is responsible for freeing.
+ * is responsible for freeing. If the matrix rows are uneven length, returns
+ * NULL.
  *
  * @param filename Path to the CSV file.
  * @return Pointer to a newly allocated Matrix containing the parsed data.
