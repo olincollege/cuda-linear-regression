@@ -144,6 +144,7 @@ Matrix* create_matrix_from_csv(const char* filename) {
   size_t element_num = 0;
   FILE* input = fopen(filename, "r");
   if (input == NULL) {
+    free_matrix_host(h_mat);
     host_error_and_exit("Opening csv stream");
   }
 
@@ -151,6 +152,8 @@ Matrix* create_matrix_from_csv(const char* filename) {
   ssize_t num_read = 0;
   char* buffer = (char*)malloc(buffer_size);
   if (buffer == NULL) {
+    free(buffer);
+    free_matrix_host(h_mat);
     host_error_and_exit("Opening csv stream buffer");
   }
   while ((num_read = getline(&buffer, &buffer_size, input)) != -1) {
@@ -168,6 +171,8 @@ Matrix* create_matrix_from_csv(const char* filename) {
               (void*)h_mat->elements, elements_allocated * 2 * sizeof(float));
           if (h_mat->elements == NULL) {
             free(buffer);
+            free_matrix_host(h_mat);
+            fclose(input);
             host_error_and_exit("Reallocate elements");
           }
           elements_allocated = elements_allocated * 2;
@@ -184,11 +189,15 @@ Matrix* create_matrix_from_csv(const char* filename) {
     }
     if (cols != first_cols) {
       free(buffer);
+      free_matrix_host(h_mat);
+      fclose(input);
       return NULL;
     }
   }
   if (ferror(input)) {
+    free_matrix_host(h_mat);
     free(buffer);
+    fclose(input);
     host_error_and_exit("Reading csv");
   }
 
@@ -199,7 +208,9 @@ Matrix* create_matrix_from_csv(const char* filename) {
         (float*)realloc((void*)h_mat->elements, element_num * sizeof(float));
   }
   if (h_mat->elements == NULL) {
+    free_matrix_host(h_mat);
     free(buffer);
+    fclose(input);
     host_error_and_exit("Reallocate elements");
   }
   h_mat->rows = rows;
