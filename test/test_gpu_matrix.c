@@ -148,26 +148,83 @@ Test(GPU_Matrix, Transpose_SmallMatrix) {
   free_matrix_host(mat);
   free_matrix_host(transposed);
 }
-// Test 2x2 matrix inversion on GPU
-// Test(GPU_Matrix, Inverse_2x2Matrix) {
-//   Matrix* mat = create_matrix_host(2, 2);
-//   float values[] = {4, 7, 2, 6};
-//   for (int i = 0; i < 4; ++i) mat->elements[i] = values[i];
 
-//   Matrix* inverse = gpu_matrix_inverse(mat);
+// Test identity matrix transpose on GPU
+Test(GPU_Matrix, Transpose_IdentityMatrix) {
+  Matrix* mat = create_matrix_host(3, 3);
+  float values[] = {1, 0, 0, 0, 1, 0, 0, 0, 1};  // 3x3 Identity
+  for (int i = 0; i < 9; ++i) mat->elements[i] = values[i];
 
-//   cr_assert_not_null(inverse);
-//   cr_assert_eq(inverse->rows, 2);
-//   cr_assert_eq(inverse->cols, 2);
+  Matrix* result = gpu_matrix_transpose(mat);
 
-//   float expected[] = {0.6, -0.7, -0.2, 0.4};
-//   for (int i = 0; i < 4; ++i) {
-//     cr_assert_float_eq(inverse->elements[i], expected[i], 1e-5);
-//   }
+  cr_assert_not_null(result);
+  cr_assert_eq(result->rows, 3);
+  cr_assert_eq(result->cols, 3);
+  for (int i = 0; i < 9; ++i) {
+    cr_assert_float_eq(result->elements[i], values[i], 1e-5);
+  }
 
-//   free_matrix_host(mat);
-//   free_matrix_host(inverse);
-// }
+  free_matrix_host(mat);
+  free_matrix_host(result);
+}
+
+// Test single value matrix transpose on GPU
+Test(GPU_Matrix, Transpose_OneByOneMatrix) {
+  Matrix* mat = create_matrix_host(1, 1);
+  mat->elements[0] = 42.0f;
+
+  Matrix* result = gpu_matrix_transpose(mat);
+
+  cr_assert_not_null(result);
+  cr_assert_eq(result->rows, 1);
+  cr_assert_eq(result->cols, 1);
+  cr_assert_float_eq(result->elements[0], 42.0f, 1e-5);
+
+  free_matrix_host(mat);
+  free_matrix_host(result);
+}
+
+// Test large matrix transpose on GPU
+Test(GPU_Matrix, Transpose_LargeMatrix) {
+  int rows = 100;
+  int cols = 200;
+  Matrix* mat = create_matrix_host(rows, cols);
+
+  for (int i = 0; i < rows * cols; ++i) {
+    mat->elements[i] = (float)i;
+  }
+
+  Matrix* result = gpu_matrix_transpose(mat);
+
+  cr_assert_not_null(result);
+  cr_assert_eq(result->rows, cols);
+  cr_assert_eq(result->cols, rows);
+
+  cr_assert_float_eq(result->elements[0], mat->elements[0], 1e-5);
+  cr_assert_float_eq(result->elements[1], mat->elements[cols], 1e-5);
+
+  free_matrix_host(mat);
+  free_matrix_host(result);
+}
+
+// Test zero matrix transpose on GPU
+Test(GPU_Matrix, Transpose_ZeroMatrix) {
+  Matrix* mat = create_matrix_host(3, 4);
+  for (int i = 0; i < 12; ++i) mat->elements[i] = 0.0f;
+
+  Matrix* result = gpu_matrix_transpose(mat);
+
+  cr_assert_not_null(result);
+  cr_assert_eq(result->rows, 4);
+  cr_assert_eq(result->cols, 3);
+
+  for (int i = 0; i < 12; ++i) {
+    cr_assert_float_eq(result->elements[i], 0.0f, 1e-5);
+  }
+
+  free_matrix_host(mat);
+  free_matrix_host(result);
+}
 
 // Test small-sized matrix scalar multiplication on GPU
 Test(GPU_Matrix, ScalarMultiply_SmallMatrix) {
