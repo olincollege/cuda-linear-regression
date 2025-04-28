@@ -18,7 +18,7 @@
  * @return Pointer to the resulting weight matrix on host (n_features x 1)
  * or NULL
  */
-Matrix* cpu_regression(Matrix* X_mat, Matrix* y_mat);
+Matrix* cpu_regression(const Matrix* X_mat, const Matrix* y_mat);
 
 /**
  * Perform linear regression on GPU using the Normal Equation.
@@ -38,4 +38,16 @@ Matrix* cpu_regression(Matrix* X_mat, Matrix* y_mat);
  * @return Pointer to the resulting weight matrix on host (n_features x 1)
  * or NULL
  */
-Matrix* gpu_regression(Matrix* X_mat, Matrix* y_mat);
+Matrix* gpu_regression(const Matrix* X_mat, const Matrix* y_mat);
+
+/**
+ * Find mean absolute error loss between target and ground truth matrices
+ *
+ * Both matrices must be column vectors with the same number of rows on the
+ * host. Returns negative number as error if conditions not met.
+ *
+ * @param targets Target values of size (n_samples x 1)
+ * @param truths Target values of size (n_samples x 1)
+ * @return Average absolute difference between values
+ */
+float mae_loss(const Matrix* targets, const Matrix* truths);

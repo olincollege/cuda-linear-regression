@@ -123,4 +123,52 @@ Test(CPU_regression, non_invertible) {
   free_matrix_host(y_mat);
 }
 
+// Test mean absolute error with variety of differences
+Test(mean_absolute_error, mean_error_value) {
+  Matrix* arr_1 = create_matrix_host(4, 1);
+  Matrix* arr_2 = create_matrix_host(4, 1);
+
+  float arr_1_val[] = {4, 2, -1, 3};
+  float arr_2_val[] = {-1, 2, 3, 2};
+
+  for (size_t i = 0; i < arr_1->rows; i++) {
+    arr_1->elements[i] = arr_1_val[i];
+    arr_2->elements[i] = arr_2_val[i];
+  }
+
+  float loss = mae_loss(arr_1, arr_2);
+
+  cr_assert_float_eq(loss, 2.5, 1e-3, "2.5 loss expected but got %f",
+                     (double)loss);
+
+  free_matrix_host(arr_1);
+  free_matrix_host(arr_2);
+}
+
+// Test error when unequal number of elements
+Test(mean_absolute_error, unequal_error) {
+  Matrix* arr_1 = create_matrix_host(4, 1);
+  Matrix* arr_2 = create_matrix_host(5, 1);
+
+  float loss = mae_loss(arr_1, arr_2);
+
+  cr_assert(lt(dbl, loss, 0), "Error should be negative, got %f", (double)loss);
+
+  free_matrix_host(arr_1);
+  free_matrix_host(arr_2);
+}
+
+// Test error when non column vector
+Test(mean_absolute_error, non_col_vector_error) {
+  Matrix* arr_1 = create_matrix_host(4, 2);
+  Matrix* arr_2 = create_matrix_host(4, 1);
+
+  float loss = mae_loss(arr_1, arr_2);
+
+  cr_assert(lt(dbl, loss, 0), "Error should be negative, got %f", (double)loss);
+
+  free_matrix_host(arr_1);
+  free_matrix_host(arr_2);
+}
+
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,cppcoreguidelines-pro-bounds-pointer-arithmetic)

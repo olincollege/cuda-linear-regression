@@ -10,8 +10,7 @@
 // Test that NANO_SEC_TO_SEC is correct
 Test(timing_constants, nano_factor_correct) {
   cr_assert(ieee_ulp_eq(dbl, NANO_SEC_TO_SEC, 1e-9, 3),
-            "Expected NANO_SEC_TO_SEC to be close to 1e-9 but got %f",
-            NANO_SEC_TO_SEC);
+            "Expected NANO_SEC_TO_SEC to be 1e-9 but got %f", NANO_SEC_TO_SEC);
 }
 
 // Test that get_current_time returns a positive number

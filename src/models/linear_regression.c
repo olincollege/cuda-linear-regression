@@ -1,10 +1,12 @@
 #include "linear_regression.h"
 
+#include <math.h>
+
 #include "cpu_matrix.h"
 #include "gpu_matrix.h"
 #include "matrix.h"
 
-Matrix* cpu_regression(Matrix* X_mat, Matrix* y_mat) {
+Matrix* cpu_regression(const Matrix* X_mat, const Matrix* y_mat) {
   if (X_mat->rows != y_mat->rows) {
     return NULL;
   }
@@ -27,7 +29,7 @@ Matrix* cpu_regression(Matrix* X_mat, Matrix* y_mat) {
   return weights;
 }
 
-Matrix* gpu_regression(Matrix* X_mat, Matrix* y_mat) {
+Matrix* gpu_regression(const Matrix* X_mat, const Matrix* y_mat) {
   if (X_mat->rows != y_mat->rows) {
     return NULL;
   }
@@ -48,4 +50,18 @@ Matrix* gpu_regression(Matrix* X_mat, Matrix* y_mat) {
   free_matrix_host(X_t_y);
 
   return weights;
+}
+
+float mae_loss(const Matrix* targets, const Matrix* truths) {
+  if (targets->rows != truths->rows || targets->cols != 1 ||
+      truths->cols != 1) {
+    return -1.0F;
+  }
+  Matrix* diff = cpu_matrix_subtract(targets, truths);
+  float total_diff = 0;
+  for (size_t i = 0; i < diff->rows; i++) {
+    total_diff += fabsf(diff->elements[i]);
+  }
+  free_matrix_host(diff);
+  return total_diff / (float)targets->rows;
 }
