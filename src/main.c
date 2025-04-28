@@ -7,7 +7,7 @@
 
 const size_t num_runs = 100;
 char* const weight_meaning[] = {"Gestation length (days)",
-                                "If first pregnancy",
+                                "If not first pregnancy",
                                 "Mother's age (yrs)",
                                 "Mother's height (in)",
                                 "Mother's weight (lbs)",
@@ -55,7 +55,7 @@ int main(void) {
   // Calculate weights to use
   Matrix* weights = cpu_regression(X_train, y_train);
 
-  // Print weights gestation,parity,age,height,weight,smoke
+  // Print weights
   puts("Calculated Weights: ");
   for (size_t i = 0; i < weights->rows; i++) {
     printf("  %s: %f\n", weight_meaning[i], (double)weights->elements[i]);
