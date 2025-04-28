@@ -251,6 +251,66 @@ Test(GPU_Matrix, ScalarMultiply_SmallMatrix) {
   free_matrix_host(result);
 }
 
+// Test scalar multiply zero to matrix on GPU
+Test(GPU_Matrix, ScalarMultiply_Zero) {
+  Matrix* mat = create_matrix_host(1, 3);
+  mat->elements[0] = 5;
+  mat->elements[1] = -2;
+  mat->elements[2] = 9;
+
+  Matrix* result = gpu_scalar_multiply(mat, 0.0f);
+
+  cr_assert_not_null(result);
+  for (int i = 0; i < 3; ++i) {
+    cr_assert_float_eq(result->elements[i], 0.0f, 1e-5);
+  }
+
+  free_matrix_host(mat);
+  free_matrix_host(result);
+}
+
+// Test scalar multiply negative number on GPU
+Test(GPU_Matrix, ScalarMultiply_Negative) {
+  Matrix* mat = create_matrix_host(2, 1);
+  mat->elements[0] = 4;
+  mat->elements[1] = -3;
+
+  Matrix* result = gpu_scalar_multiply(mat, -2.0f);
+
+  cr_assert_not_null(result);
+  cr_assert_float_eq(result->elements[0], -8.0f, 1e-5);
+  cr_assert_float_eq(result->elements[1], 6.0f, 1e-5);
+
+  free_matrix_host(mat);
+  free_matrix_host(result);
+}
+
+// Test scalar multiply when input is null on GPU
+Test(GPU_Matrix, ScalarMultiply_NullInput) {
+  Matrix* result = gpu_scalar_multiply(NULL, 2.0f);
+
+  cr_assert_null(result, "input matrix is NULL");
+}
+
+// Test large matrix scalar multiplication on PGU
+Test(GPU_Matrix, ScalarMultiply_LargeMatrix) {
+  int rows = 1000, cols = 1000;
+  Matrix* mat = create_matrix_host(rows, cols);
+  for (int i = 0; i < rows * cols; ++i) {
+    mat->elements[i] = 1.0f;
+  }
+
+  Matrix* result = gpu_scalar_multiply(mat, 3.0f);
+
+  cr_assert_not_null(result);
+  for (int i = 0; i < rows * cols; ++i) {
+    cr_assert_float_eq(result->elements[i], 3.0f, 1e-5);
+  }
+
+  free_matrix_host(mat);
+  free_matrix_host(result);
+}
+
 // Test small-sized matrix addition on GPU
 Test(GPU_Matrix, Add_SmallMatrix) {
   Matrix* matA = create_matrix_host(2, 2);
@@ -263,20 +323,80 @@ Test(GPU_Matrix, Add_SmallMatrix) {
     matB->elements[i] = valuesB[i];
   }
 
-  Matrix* sum = gpu_matrix_add(matA, matB);
+  Matrix* result = gpu_matrix_add(matA, matB);
 
-  cr_assert_not_null(sum);
-  cr_assert_eq(sum->rows, 2);
-  cr_assert_eq(sum->cols, 2);
+  cr_assert_not_null(result);
+  cr_assert_eq(result->rows, 2);
+  cr_assert_eq(result->cols, 2);
 
   float expected[] = {6, 8, 10, 12};  // 2x2
   for (int i = 0; i < 4; ++i) {
-    cr_assert_float_eq(sum->elements[i], expected[i], 1e-5);
+    cr_assert_float_eq(result->elements[i], expected[i], 1e-5);
   }
 
   free_matrix_host(matA);
   free_matrix_host(matB);
-  free_matrix_host(sum);
+  free_matrix_host(result);
+}
+
+// Test adding negative elements on GPU
+Test(GPU_Matrix, MatrixAdd_NegativeElements) {
+  Matrix* a = create_matrix_host(1, 3);
+  Matrix* b = create_matrix_host(1, 3);
+  float vals_a[] = {-1, 2, -3};
+  float vals_b[] = {4, -5, 6};
+  for (int i = 0; i < 3; ++i) {
+    a->elements[i] = vals_a[i];
+    b->elements[i] = vals_b[i];
+  }
+
+  Matrix* result = gpu_matrix_add(a, b);
+
+  cr_assert_not_null(result);
+  float expected[] = {3, -3, 3};
+  for (int i = 0; i < 3; ++i) {
+    cr_assert_float_eq(result->elements[i], expected[i], 1e-5);
+  }
+
+  free_matrix_host(a);
+  free_matrix_host(b);
+  free_matrix_host(result);
+}
+
+// Test adding matrices with different dimension on GPU
+Test(GPU_Matrix, MatrixAdd_DimensionMismatch) {
+  Matrix* a = create_matrix_host(2, 2);
+  Matrix* b = create_matrix_host(3, 2);  // Different dimensions
+
+  Matrix* result = gpu_matrix_add(a, b);
+
+  cr_assert_null(result);
+
+  free_matrix_host(a);
+  free_matrix_host(b);
+}
+
+// Test adding large matrix on GPU
+Test(GPU_Matrix, MatrixAdd_LargeMatrix) {
+  int rows = 1000, cols = 1000;
+  Matrix* a = create_matrix_host(rows, cols);
+  Matrix* b = create_matrix_host(rows, cols);
+
+  for (int i = 0; i < rows * cols; ++i) {
+    a->elements[i] = 2.0f;
+    b->elements[i] = 5.0f;
+  }
+
+  Matrix* result = gpu_matrix_add(a, b);
+
+  cr_assert_not_null(result);
+  for (int i = 0; i < rows * cols; ++i) {
+    cr_assert_float_eq(result->elements[i], 7.0f, 1e-5);
+  }
+
+  free_matrix_host(a);
+  free_matrix_host(b);
+  free_matrix_host(result);
 }
 
 // Test small-sized matrix subtraction on GPU
@@ -291,18 +411,74 @@ Test(GPU_Matrix, Subtract_SmallMatrix) {
     matB->elements[i] = valuesB[i];
   }
 
-  Matrix* difference = gpu_matrix_subtract(matA, matB);
+  Matrix* result = gpu_matrix_subtract(matA, matB);
 
-  cr_assert_not_null(difference);
-  cr_assert_eq(difference->rows, 2);
-  cr_assert_eq(difference->cols, 2);
+  cr_assert_not_null(result);
+  cr_assert_eq(result->rows, 2);
+  cr_assert_eq(result->cols, 2);
 
   float expected[] = {4, 4, 4, 4};  // 2x2
   for (int i = 0; i < 4; ++i) {
-    cr_assert_float_eq(difference->elements[i], expected[i], 1e-5);
+    cr_assert_float_eq(result->elements[i], expected[i], 1e-5);
   }
 
   free_matrix_host(matA);
   free_matrix_host(matB);
-  free_matrix_host(difference);
+  free_matrix_host(result);
+}
+
+// Test subtracting negative elements on GPU
+Test(GPU_Matrix, MatrixSubtract_NegativeResults) {
+  Matrix* a = create_matrix_host(1, 2);
+  Matrix* b = create_matrix_host(1, 2);
+  a->elements[0] = 2;
+  a->elements[1] = 3;
+  b->elements[0] = 5;
+  b->elements[1] = 1;
+
+  Matrix* result = gpu_matrix_subtract(a, b);
+
+  cr_assert_not_null(result);
+  cr_assert_float_eq(result->elements[0], -3.0f, 1e-5);
+  cr_assert_float_eq(result->elements[1], 2.0f, 1e-5);
+
+  free_matrix_host(a);
+  free_matrix_host(b);
+  free_matrix_host(result);
+}
+
+// Test subtracting matrices with different dimensions on GPU
+Test(GPU_Matrix, MatrixSubtract_DimensionMismatch) {
+  Matrix* a = create_matrix_host(2, 2);
+  Matrix* b = create_matrix_host(2, 3);  // Incompatible dimensions
+
+  Matrix* result = gpu_matrix_subtract(a, b);
+
+  cr_assert_null(result);
+
+  free_matrix_host(a);
+  free_matrix_host(b);
+}
+
+// Test subtracting large matrix on GPU
+Test(GPU_Matrix, MatrixSubtract_LargeMatrix) {
+  int rows = 1000, cols = 1000;
+  Matrix* a = create_matrix_host(rows, cols);
+  Matrix* b = create_matrix_host(rows, cols);
+
+  for (int i = 0; i < rows * cols; ++i) {
+    a->elements[i] = 10.0f;
+    b->elements[i] = 1.0f;
+  }
+
+  Matrix* result = gpu_matrix_subtract(a, b);
+
+  cr_assert_not_null(result);
+  for (int i = 0; i < rows * cols; ++i) {
+    cr_assert_float_eq(result->elements[i], 9.0f, 1e-5);
+  }
+
+  free_matrix_host(a);
+  free_matrix_host(b);
+  free_matrix_host(result);
 }
