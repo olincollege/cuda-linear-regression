@@ -24,10 +24,85 @@ Test(CPU_Matrix, Multiply_SmallMatrix) {
   for (int i = 0; i < 4; ++i) {
     cr_assert_float_eq(C->elements[i], expected[i], 1e-5);
   }
+}
 
-  free_matrix_host(A);
-  free_matrix_host(B);
-  free_matrix_host(C);
+// Test identity matrix multiplication on CPU
+Test(CPU_Matrix, Multiply_IdentityMatrix) {
+  Matrix* mat = create_matrix_host(2, 2);
+  float values[] = {1, 2, 3, 4};
+  for (int i = 0; i < 4; ++i) mat->elements[i] = values[i];
+
+  Matrix* identity = create_matrix_host(2, 2);
+  float identity_values[] = {1, 0, 0, 1};
+  for (int i = 0; i < 4; ++i) identity->elements[i] = identity_values[i];
+
+  Matrix* result = cpu_matrix_multiply(mat, identity);
+
+  cr_assert_not_null(result);
+  for (int i = 0; i < 4; ++i) {
+    cr_assert_float_eq(result->elements[i], values[i], 1e-5);
+  }
+}
+
+// Test zero matrix multiplication on CPU
+Test(CPU_Matrix, Multiply_ZeroMatrix) {
+  Matrix* mat = create_matrix_host(2, 2);
+  float values[] = {5, 6, 7, 8};
+  for (int i = 0; i < 4; ++i) mat->elements[i] = values[i];
+
+  Matrix* zero = create_matrix_host(2, 2);
+  for (int i = 0; i < 4; ++i) zero->elements[i] = 0.0f;
+
+  Matrix* result = cpu_matrix_multiply(mat, zero);
+
+  cr_assert_not_null(result);
+  for (int i = 0; i < 4; ++i) {
+    cr_assert_float_eq(result->elements[i], 0.0f, 1e-5);
+  }
+}
+
+// Test invalid matrix multiplication on CPU
+Test(CPU_Matrix, Multiply_MismatchedDimensions) {
+  Matrix* mat_a = create_matrix_host(2, 3);
+  Matrix* mat_b = create_matrix_host(4, 2);  // incompatible
+
+  Matrix* result = cpu_matrix_multiply(mat_a, mat_b);
+
+  cr_assert_null(result);
+}
+
+// Test large matrix multiplication on CPU
+Test(CPU_Matrix, Multiply_LargeMatrix) {
+  Matrix* mat_a = create_matrix_host(100, 200);
+  Matrix* mat_b = create_matrix_host(200, 50);
+
+  for (int i = 0; i < 100 * 200; ++i) mat_a->elements[i] = 1.0f;
+  for (int i = 0; i < 200 * 50; ++i) mat_b->elements[i] = 1.0f;
+
+  Matrix* result = cpu_matrix_multiply(mat_a, mat_b);
+
+  cr_assert_not_null(result);
+  cr_assert_eq(result->rows, 100);
+  cr_assert_eq(result->cols, 50);
+
+  for (int i = 0; i < result->rows * result->cols; ++i) {
+    cr_assert_float_eq(result->elements[i], 200.0f, 1e-3);
+  }
+}
+
+// Test non-square matrix multiplication on CPU
+Test(CPU_Matrix, Multiply_NonSquareMatrix) {
+  Matrix* mat_a = create_matrix_host(2, 4);
+  Matrix* mat_b = create_matrix_host(4, 3);
+
+  for (int i = 0; i < 8; ++i) mat_a->elements[i] = i + 1;
+  for (int i = 0; i < 12; ++i) mat_b->elements[i] = i + 1;
+
+  Matrix* result = cpu_matrix_multiply(mat_a, mat_b);
+
+  cr_assert_not_null(result);
+  cr_assert_eq(result->rows, 2);
+  cr_assert_eq(result->cols, 3);
 }
 
 // Test small-sized matrix transpose on CPU
@@ -46,9 +121,6 @@ Test(CPU_Matrix, Transpose_SmallMatrix) {
   for (int i = 0; i < 6; ++i) {
     cr_assert_float_eq(transposed->elements[i], expected[i], 1e-5);
   }
-
-  free_matrix_host(mat);
-  free_matrix_host(transposed);
 }
 // Test 2x2 matrix inversion on CPU
 Test(CPU_Matrix, Inverse_2x2Matrix) {
@@ -66,9 +138,6 @@ Test(CPU_Matrix, Inverse_2x2Matrix) {
   for (int i = 0; i < 4; ++i) {
     cr_assert_float_eq(inverse->elements[i], expected[i], 1e-5);
   }
-
-  free_matrix_host(mat);
-  free_matrix_host(inverse);
 }
 
 // Test small-sized matrix scalar multiplication on CPU
@@ -91,9 +160,6 @@ Test(CPU_Matrix, ScalarMultiply_SmallMatrix) {
   for (int i = 0; i < 4; ++i) {
     cr_assert_float_eq(result->elements[i], expected[i], 1e-5);
   }
-
-  free_matrix_host(mat);
-  free_matrix_host(result);
 }
 
 // Test small-sized matrix addition on CPU
@@ -118,10 +184,6 @@ Test(CPU_Matrix, Add_SmallMatrix) {
   for (int i = 0; i < 4; ++i) {
     cr_assert_float_eq(sum->elements[i], expected[i], 1e-5);
   }
-
-  free_matrix_host(matA);
-  free_matrix_host(matB);
-  free_matrix_host(sum);
 }
 
 // Test small-sized matrix subtraction on CPU
@@ -146,8 +208,4 @@ Test(CPU_Matrix, Subtract_SmallMatrix) {
   for (int i = 0; i < 4; ++i) {
     cr_assert_float_eq(difference->elements[i], expected[i], 1e-5);
   }
-
-  free_matrix_host(matA);
-  free_matrix_host(matB);
-  free_matrix_host(difference);
 }
