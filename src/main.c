@@ -73,6 +73,7 @@ int main(void) {
   free_matrix_host(y_test_pred);
   printf("Test mean absolute difference: %f\n", (double)test_loss);
 
+  free_matrix_host(weights);
   free_matrix_host(X_train);
   free_matrix_host(y_train);
   free_matrix_host(X_test);
