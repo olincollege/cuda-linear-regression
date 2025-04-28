@@ -105,9 +105,9 @@ Test(load_matrix, huge_csv_elements) {
 // Test correct rows and columns of huge matrix
 Test(load_matrix, huge_csv_size) {
   Matrix* loaded = create_matrix_from_csv("../../data/1000x1000.csv");
-  cr_assert(eq(int, loaded->rows, 1000), "3 expected but got %d rows",
+  cr_assert(eq(int, loaded->rows, 1000), "1000 expected but got %d rows",
             loaded->rows);
-  cr_assert(eq(int, loaded->cols, 1000), "3 expected but got %d cols",
+  cr_assert(eq(int, loaded->cols, 1000), "1000 expected but got %d cols",
             loaded->cols);
   free_matrix_host(loaded);
 }
