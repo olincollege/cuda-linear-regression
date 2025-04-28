@@ -3,6 +3,11 @@
 #include "gpu_matrix.h"
 #include "matrix.h"
 
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,cppcoreguidelines-pro-bounds-pointer-arithmetic)
+// Since we're testing, magic numbers are needed to configure specific cases
+// Also ignore pointer arithmetic warning, since in all cases it is in a loop
+// which prevents out of bounds
+
 // Test small-sized matrix multiplication on GPU
 Test(GPU_Matrix, Multiply_SmallMatrix) {
   Matrix* A = create_matrix_host(2, 3);
@@ -482,3 +487,5 @@ Test(GPU_Matrix, MatrixSubtract_LargeMatrix) {
   free_matrix_host(b);
   free_matrix_host(result);
 }
+
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,cppcoreguidelines-pro-bounds-pointer-arithmetic)

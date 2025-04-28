@@ -1,5 +1,126 @@
 #include <criterion/criterion.h>
+#include <criterion/new/assert.h>
+#include <stdlib.h>
 
-#include "gpu_matrix.h"
 #include "linear_regression.h"
 #include "matrix.h"
+
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,cppcoreguidelines-pro-bounds-pointer-arithmetic)
+// Since we're testing, magic numbers are needed to configure specific cases
+// Also ignore pointer arithmetic warning, since in all cases it is in a loop
+// which prevents out of bounds
+
+// Test small-sized matrix multiplication on CPU
+Test(CPU_regression, correct_weight_bias_exact) {
+  Matrix* X_mat = create_matrix_host(100, 2);
+  Matrix* y_mat = create_matrix_host(100, 1);
+
+  float weight = 5.0F;
+  float bias = 32.0F;
+
+  for (size_t i = 0; i < (X_mat->rows * X_mat->cols); i++) {
+    if (i % 2 == 0) {
+      X_mat->elements[i] = (float)i / (2.0F);
+    } else {
+      X_mat->elements[i] = 1;
+    }
+    if (i < y_mat->rows) {
+      y_mat->elements[i] = ((float)i * weight) + bias;
+    }
+  }
+
+  Matrix* weights = cpu_regression(X_mat, y_mat);
+
+  cr_assert_not_null(weights);
+  cr_assert_float_eq(weights->elements[0], weight, 1e-3,
+                     "%f weight expected but got %f", (double)weight,
+                     (double)weights->elements[0]);
+  cr_assert_float_eq(weights->elements[1], bias, 1e-3,
+                     "%f bias expected but got %f", (double)bias,
+                     (double)weights->elements[1]);
+
+  free_matrix_host(X_mat);
+  free_matrix_host(y_mat);
+  free_matrix_host(weights);
+}
+
+// Test small-sized matrix multiplication on CPU
+Test(CPU_regression, correct_weight_bias_noise) {
+  Matrix* X_mat = create_matrix_host(100, 2);
+  Matrix* y_mat = create_matrix_host(100, 1);
+
+  float weight = 5.0F;
+  float bias = 32.0F;
+
+  for (size_t i = 0; i < (X_mat->rows * X_mat->cols); i++) {
+    if (i % 2 == 0) {
+      X_mat->elements[i] = (float)i / (2.0F);
+    } else {
+      X_mat->elements[i] = 1;
+    }
+    if (i < y_mat->rows) {
+      // NOLINTNEXTLINE(cert-msc30-c,cert-msc50-cpp,concurrency-mt-unsafe)
+      float random_number = (float)rand() / (float)(RAND_MAX / 2) - 1;
+      y_mat->elements[i] = ((float)i * weight) + bias + random_number;
+    }
+  }
+
+  Matrix* weights = cpu_regression(X_mat, y_mat);
+
+  cr_assert_not_null(weights);
+  cr_assert_float_eq(weights->elements[0], weight, .1,
+                     "%f weight expected but got %f", (double)weight,
+                     (double)weights->elements[0]);
+  cr_assert_float_eq(weights->elements[1], bias, .1,
+                     "%f bias expected but got %f", (double)bias,
+                     (double)weights->elements[1]);
+
+  free_matrix_host(X_mat);
+  free_matrix_host(y_mat);
+  free_matrix_host(weights);
+}
+
+// Test incompatible dimensions is NULL
+Test(CPU_regression, incompatible_dim) {
+  Matrix* X_mat = create_matrix_host(3, 2);
+  Matrix* y_mat = create_matrix_host(2, 1);
+
+  for (size_t i = 0; i < (X_mat->rows * X_mat->cols); i++) {
+    X_mat->elements[i] = 1.0F;
+  }
+  for (size_t i = 0; i < (y_mat->rows * y_mat->cols); i++) {
+    y_mat->elements[i] = 1.0F;
+  }
+
+  Matrix* weights = cpu_regression(X_mat, y_mat);
+
+  cr_assert(eq(ptr, weights, NULL), "NULL expected but got %p", weights);
+
+  free_matrix_host(X_mat);
+  free_matrix_host(y_mat);
+}
+
+// Test non-invertible is NULL
+Test(CPU_regression, non_invertible) {
+  Matrix* X_mat = create_matrix_host(3, 2);
+  Matrix* y_mat = create_matrix_host(3, 1);
+
+  // Cols are linearly dependant
+  float X_vals[] = {1, 2, 2, 4, 3, 6};
+
+  for (size_t i = 0; i < (X_mat->rows * X_mat->cols); i++) {
+    X_mat->elements[i] = X_vals[i];
+  }
+  for (size_t i = 0; i < (y_mat->rows * y_mat->cols); i++) {
+    y_mat->elements[i] = 1.0F;
+  }
+
+  Matrix* weights = cpu_regression(X_mat, y_mat);
+
+  cr_assert(eq(ptr, weights, NULL), "NULL expected but got %p", weights);
+
+  free_matrix_host(X_mat);
+  free_matrix_host(y_mat);
+}
+
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,cppcoreguidelines-pro-bounds-pointer-arithmetic)

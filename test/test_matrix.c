@@ -1,10 +1,12 @@
 #include <criterion/criterion.h>
 #include <criterion/new/assert.h>
-#include <criterion/redirect.h>
 
 #include "matrix.h"
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,cppcoreguidelines-pro-bounds-pointer-arithmetic)
+// Since we're testing, magic numbers are needed to configure specific cases
+// Also ignore pointer arithmetic warning, since in all cases it is in a loop
+// which prevents out of bounds
 
 // Test rows and cols initialized correctly on host
 Test(create_matrix_host, rows_and_cols_set_correctly) {
@@ -64,8 +66,8 @@ Test(copy_matrix, copies_elements_correctly) {
   Matrix* new_h_mat = copy_matrix_device_to_host(d_mat);
   for (int i = 0; i < 12; i++) {
     cr_assert(ieee_ulp_eq(flt, h_mat->elements[i], new_h_mat->elements[i], 3),
-              "%f expected but got %f", h_mat->elements[i],
-              new_h_mat->elements[i]);
+              "%f expected but got %f", (double)h_mat->elements[i],
+              (double)new_h_mat->elements[i]);
   }
   free_matrix_host(h_mat);
   free_matrix_host(new_h_mat);
@@ -77,7 +79,8 @@ Test(load_matrix, small_CSV_elements) {
   Matrix* loaded = create_matrix_from_csv("../../data/3x3_matrix.csv");
   for (int i = 0; i < 9; i++) {
     cr_assert(ieee_ulp_eq(flt, loaded->elements[i], (float)(i + 1), 3),
-              "%f expected but got %f", (float)(i + 1), loaded->elements[i]);
+              "%f expected but got %f", (double)(i + 1),
+              (double)loaded->elements[i]);
   }
   free_matrix_host(loaded);
 }
@@ -97,7 +100,7 @@ Test(load_matrix, huge_csv_elements) {
   Matrix* loaded = create_matrix_from_csv("../../data/1000x1000.csv");
   for (int i = 0; i < (1000000); i++) {
     cr_assert(ieee_ulp_eq(flt, loaded->elements[i], (float)(i), 3),
-              "%f expected but got %f", (float)(i), loaded->elements[i]);
+              "%f expected but got %f", (double)i, (double)loaded->elements[i]);
   }
   free_matrix_host(loaded);
 }
@@ -124,7 +127,8 @@ Test(load_matrix, trailing_comma_elements) {
       create_matrix_from_csv("../../data/3x3_matrix_ending_commas.csv");
   for (int i = 0; i < 9; i++) {
     cr_assert(ieee_ulp_eq(flt, loaded->elements[i], (float)(i + 1), 3),
-              "%f expected but got %f", (float)(i + 1), loaded->elements[i]);
+              "%f expected but got %f", (double)(i + 1),
+              (double)loaded->elements[i]);
   }
   free_matrix_host(loaded);
 }

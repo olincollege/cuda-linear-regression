@@ -3,6 +3,11 @@
 #include "cpu_matrix.h"
 #include "matrix.h"
 
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,cppcoreguidelines-pro-bounds-pointer-arithmetic)
+// Since we're testing, magic numbers are needed to configure specific cases
+// Also ignore pointer arithmetic warning, since in all cases it is in a loop
+// which prevents out of bounds
+
 // Test small-sized matrix multiplication on CPU
 Test(CPU_Matrix, Multiply_SmallMatrix) {
   Matrix* A = create_matrix_host(2, 3);
@@ -464,3 +469,5 @@ Test(CPU_Matrix, MatrixSubtract_LargeMatrix) {
     cr_assert_float_eq(result->elements[i], 9.0f, 1e-5);
   }
 }
+
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,cppcoreguidelines-pro-bounds-pointer-arithmetic)
