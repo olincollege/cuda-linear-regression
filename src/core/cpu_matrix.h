@@ -15,7 +15,7 @@ extern const float ZERO_THRESH;
  * @param right_mat The right matrix in multiplication.
  * @return Pointer to result matrix or NULL if incompatible matrices.
  */
-Matrix* cpu_matrix_multiply(Matrix* left_mat, Matrix* right_mat);
+Matrix* cpu_matrix_multiply(const Matrix* left_mat, const Matrix* right_mat);
 
 /**
  * Transpose a matrix using the CPU.
@@ -26,7 +26,7 @@ Matrix* cpu_matrix_multiply(Matrix* left_mat, Matrix* right_mat);
  * @param mat Pointer to the input matrix.
  * @return Pointer to the transposed matrix.
  */
-Matrix* cpu_matrix_transpose(Matrix* mat);
+Matrix* cpu_matrix_transpose(const Matrix* mat);
 
 /**
  * Compute the inverse of a matrix using the CPU.
@@ -37,7 +37,7 @@ Matrix* cpu_matrix_transpose(Matrix* mat);
  * @param mat Pointer to the matrix to invert.
  * @return Pointer to the inverted matrix or NULL if not invertible.
  */
-Matrix* cpu_matrix_inverse(Matrix* mat);
+Matrix* cpu_matrix_inverse(const Matrix* mat);
 
 /**
  * Multiply every element of a matrix by a scalar value on the CPU.
@@ -48,7 +48,7 @@ Matrix* cpu_matrix_inverse(Matrix* mat);
  * @param scalar The scalar value to multiply each element by.
  * @return Pointer to the scaled matrix.
  */
-Matrix* cpu_scalar_multiply(Matrix* mat, float scalar);
+Matrix* cpu_scalar_multiply(const Matrix* mat, const float scalar);
 
 /**
  * Add two matrices element-wise using the CPU.
@@ -60,7 +60,7 @@ Matrix* cpu_scalar_multiply(Matrix* mat, float scalar);
  * @param mat_b Second matrix.
  * @return Pointer to the result matrix or NULL if dimensions mismatch.
  */
-Matrix* cpu_matrix_add(Matrix* mat_a, Matrix* mat_b);
+Matrix* cpu_matrix_add(const Matrix* mat_a, const Matrix* mat_b);
 
 /**
  * Subtract one matrix from another element-wise using the CPU.
@@ -72,4 +72,4 @@ Matrix* cpu_matrix_add(Matrix* mat_a, Matrix* mat_b);
  * @param mat_b Matrix to subtract.
  * @return Pointer to the result matrix or NULL if dimensions mismatch.
  */
-Matrix* cpu_matrix_subtract(Matrix* mat_a, Matrix* mat_b);
+Matrix* cpu_matrix_subtract(const Matrix* mat_a, const Matrix* mat_b);

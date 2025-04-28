@@ -6,7 +6,7 @@
 
 const float ZERO_THRESH = (float)1e-7;
 
-Matrix* cpu_matrix_multiply(Matrix* left_mat, Matrix* right_mat) {
+Matrix* cpu_matrix_multiply(const Matrix* left_mat, const Matrix* right_mat) {
   if (!left_mat || !right_mat || !left_mat->elements || !right_mat->elements)
     return NULL;
 
@@ -29,7 +29,7 @@ Matrix* cpu_matrix_multiply(Matrix* left_mat, Matrix* right_mat) {
   return result;
 }
 
-Matrix* cpu_matrix_transpose(Matrix* mat) {
+Matrix* cpu_matrix_transpose(const Matrix* mat) {
   if (!mat || !mat->elements) return NULL;
 
   Matrix* transposed = create_matrix_host(mat->cols, mat->rows);
@@ -45,7 +45,7 @@ Matrix* cpu_matrix_transpose(Matrix* mat) {
   return transposed;
 }
 
-Matrix* cpu_matrix_inverse(Matrix* mat) {
+Matrix* cpu_matrix_inverse(const Matrix* mat) {
   if (mat->cols != mat->rows) {
     return NULL;
   }
@@ -124,7 +124,7 @@ Matrix* cpu_matrix_inverse(Matrix* mat) {
   return i_mat;
 }
 
-Matrix* cpu_scalar_multiply(Matrix* mat, float scalar) {
+Matrix* cpu_scalar_multiply(const Matrix* mat, const float scalar) {
   if (!mat || !mat->elements) return NULL;
 
   Matrix* result = create_matrix_host(mat->rows, mat->cols);
@@ -137,7 +137,7 @@ Matrix* cpu_scalar_multiply(Matrix* mat, float scalar) {
   return result;
 }
 
-Matrix* cpu_matrix_add(Matrix* mat_a, Matrix* mat_b) {
+Matrix* cpu_matrix_add(const Matrix* mat_a, const Matrix* mat_b) {
   if (!mat_a || !mat_b || !mat_a->elements || !mat_b->elements) return NULL;
 
   if (mat_a->rows != mat_b->rows || mat_a->cols != mat_b->cols) return NULL;
@@ -152,7 +152,7 @@ Matrix* cpu_matrix_add(Matrix* mat_a, Matrix* mat_b) {
   return result;
 }
 
-Matrix* cpu_matrix_subtract(Matrix* mat_a, Matrix* mat_b) {
+Matrix* cpu_matrix_subtract(const Matrix* mat_a, const Matrix* mat_b) {
   if (!mat_a || !mat_b || !mat_a->elements || !mat_b->elements) return NULL;
 
   if (mat_a->rows != mat_b->rows || mat_a->cols != mat_b->cols) return NULL;
