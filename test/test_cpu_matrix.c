@@ -209,6 +209,51 @@ Test(CPU_Matrix, Inverse_2x2Matrix) {
   }
 }
 
+// Test non-invertible matrix on CPU
+Test(CPU_Matrix, Inverse_SingularMatrix) {
+  Matrix* mat = create_matrix_host(2, 2);
+  float values[] = {1, 2, 2, 4};  // determinant = 0 -> singular
+  for (int i = 0; i < 4; ++i) mat->elements[i] = values[i];
+
+  Matrix* result = cpu_matrix_inverse(mat);
+
+  cr_assert_null(result);  // Should fail to invert
+}
+
+// Test identity matrix inversion on CPU
+Test(CPU_Matrix, Inverse_IdentityMatrix) {
+  Matrix* mat = create_matrix_host(3, 3);
+  for (int i = 0; i < 9; ++i) mat->elements[i] = (i % 4 == 0) ? 1.0f : 0.0f;
+
+  Matrix* result = cpu_matrix_inverse(mat);
+
+  cr_assert_not_null(result);
+  cr_assert_eq(result->rows, 3);
+  cr_assert_eq(result->cols, 3);
+
+  for (int i = 0; i < 9; ++i) {
+    cr_assert_float_eq(result->elements[i], mat->elements[i], 1e-5);
+  }
+}
+
+// Test inversion on matrix with negative elements on CPU
+Test(CPU_Matrix, Inverse_NegativeElements) {
+  Matrix* mat = create_matrix_host(2, 2);
+  float values[] = {-2, -3, -1, -4};
+  for (int i = 0; i < 4; ++i) mat->elements[i] = values[i];
+
+  Matrix* result = cpu_matrix_inverse(mat);
+
+  cr_assert_not_null(result);
+  cr_assert_eq(result->rows, 2);
+  cr_assert_eq(result->cols, 2);
+  float expected[] = {-0.8, 0.6, 0.2, -0.4};
+
+  for (int i = 0; i < 4; ++i) {
+    cr_assert_float_eq(result->elements[i], expected[i], 1e-5);
+  }
+}
+
 // Test small-sized matrix scalar multiplication on CPU
 Test(CPU_Matrix, ScalarMultiply_SmallMatrix) {
   Matrix* mat = create_matrix_host(2, 2);
