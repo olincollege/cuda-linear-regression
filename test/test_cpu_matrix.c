@@ -111,32 +111,101 @@ Test(CPU_Matrix, Transpose_SmallMatrix) {
   float values[] = {1, 2, 3, 4, 5, 6};  // 2x3
   for (int i = 0; i < 6; ++i) mat->elements[i] = values[i];
 
-  Matrix* transposed = cpu_matrix_transpose(mat);
+  Matrix* result = cpu_matrix_transpose(mat);
 
-  cr_assert_not_null(transposed);
-  cr_assert_eq(transposed->rows, 3);
-  cr_assert_eq(transposed->cols, 2);
+  cr_assert_not_null(result);
+  cr_assert_eq(result->rows, 3);
+  cr_assert_eq(result->cols, 2);
 
   float expected[] = {1, 4, 2, 5, 3, 6};  // Transposed 3x2
   for (int i = 0; i < 6; ++i) {
-    cr_assert_float_eq(transposed->elements[i], expected[i], 1e-5);
+    cr_assert_float_eq(result->elements[i], expected[i], 1e-5);
   }
 }
+
+// Test identity matrix transpose on CPU
+Test(CPU_Matrix, Transpose_IdentityMatrix) {
+  Matrix* mat = create_matrix_host(3, 3);
+  float values[] = {1, 0, 0, 0, 1, 0, 0, 0, 1};  // 3x3 Identity
+  for (int i = 0; i < 9; ++i) mat->elements[i] = values[i];
+
+  Matrix* result = cpu_matrix_transpose(mat);
+
+  cr_assert_not_null(result);
+  cr_assert_eq(result->rows, 3);
+  cr_assert_eq(result->cols, 3);
+  for (int i = 0; i < 9; ++i) {
+    cr_assert_float_eq(result->elements[i], values[i], 1e-5);
+  }
+
+  free_matrix_host(mat);
+  free_matrix_host(result);
+}
+
+// Test single value matrix transpose on CPU
+Test(CPU_Matrix, Transpose_OneByOneMatrix) {
+  Matrix* mat = create_matrix_host(1, 1);
+  mat->elements[0] = 42.0f;
+
+  Matrix* result = cpu_matrix_transpose(mat);
+
+  cr_assert_not_null(result);
+  cr_assert_eq(result->rows, 1);
+  cr_assert_eq(result->cols, 1);
+  cr_assert_float_eq(result->elements[0], 42.0f, 1e-5);
+}
+
+// Test large matrix transpose on CPU
+Test(CPU_Matrix, Transpose_LargeMatrix) {
+  int rows = 100;
+  int cols = 200;
+  Matrix* mat = create_matrix_host(rows, cols);
+
+  for (int i = 0; i < rows * cols; ++i) {
+    mat->elements[i] = (float)i;
+  }
+
+  Matrix* result = cpu_matrix_transpose(mat);
+
+  cr_assert_not_null(result);
+  cr_assert_eq(result->rows, cols);
+  cr_assert_eq(result->cols, rows);
+
+  cr_assert_float_eq(result->elements[0], mat->elements[0], 1e-5);
+  cr_assert_float_eq(result->elements[1], mat->elements[cols], 1e-5);
+}
+
+// Test zero matrix transpose on CPU
+Test(CPU_Matrix, Transpose_ZeroMatrix) {
+  Matrix* mat = create_matrix_host(3, 4);
+  for (int i = 0; i < 12; ++i) mat->elements[i] = 0.0f;
+
+  Matrix* result = cpu_matrix_transpose(mat);
+
+  cr_assert_not_null(result);
+  cr_assert_eq(result->rows, 4);
+  cr_assert_eq(result->cols, 3);
+
+  for (int i = 0; i < 12; ++i) {
+    cr_assert_float_eq(result->elements[i], 0.0f, 1e-5);
+  }
+}
+
 // Test 2x2 matrix inversion on CPU
 Test(CPU_Matrix, Inverse_2x2Matrix) {
   Matrix* mat = create_matrix_host(2, 2);
   float values[] = {4, 7, 2, 6};
   for (int i = 0; i < 4; ++i) mat->elements[i] = values[i];
 
-  Matrix* inverse = cpu_matrix_inverse(mat);
+  Matrix* result = cpu_matrix_inverse(mat);
 
-  cr_assert_not_null(inverse);
-  cr_assert_eq(inverse->rows, 2);
-  cr_assert_eq(inverse->cols, 2);
+  cr_assert_not_null(result);
+  cr_assert_eq(result->rows, 2);
+  cr_assert_eq(result->cols, 2);
 
   float expected[] = {0.6, -0.7, -0.2, 0.4};
   for (int i = 0; i < 4; ++i) {
-    cr_assert_float_eq(inverse->elements[i], expected[i], 1e-5);
+    cr_assert_float_eq(result->elements[i], expected[i], 1e-5);
   }
 }
 
