@@ -44,3 +44,13 @@ add_test(
     NAME test_matrix
     COMMAND test_matrix ${CRITERION_FLAGS}
 )
+
+add_executable(test_timing test_timing.c)
+target_link_libraries(test_timing
+    PRIVATE timing m
+    PUBLIC ${CRITERION}
+)
+add_test(
+    NAME test_timing
+    COMMAND test_timing ${CRITERION_FLAGS}
+)
