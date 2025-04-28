@@ -137,9 +137,6 @@ Test(CPU_Matrix, Transpose_IdentityMatrix) {
   for (int i = 0; i < 9; ++i) {
     cr_assert_float_eq(result->elements[i], values[i], 1e-5);
   }
-
-  free_matrix_host(mat);
-  free_matrix_host(result);
 }
 
 // Test single value matrix transpose on CPU
@@ -276,6 +273,57 @@ Test(CPU_Matrix, ScalarMultiply_SmallMatrix) {
   }
 }
 
+// Test scalar multiply zero to matrix on CPU
+Test(CPU_Matrix, ScalarMultiply_Zero) {
+  Matrix* mat = create_matrix_host(1, 3);
+  mat->elements[0] = 5;
+  mat->elements[1] = -2;
+  mat->elements[2] = 9;
+
+  Matrix* result = cpu_scalar_multiply(mat, 0.0f);
+
+  cr_assert_not_null(result);
+  for (int i = 0; i < 3; ++i) {
+    cr_assert_float_eq(result->elements[i], 0.0f, 1e-5);
+  }
+}
+
+// Test scalar multiply negative number on CPU
+Test(CPU_Matrix, ScalarMultiply_Negative) {
+  Matrix* mat = create_matrix_host(2, 1);
+  mat->elements[0] = 4;
+  mat->elements[1] = -3;
+
+  Matrix* result = cpu_scalar_multiply(mat, -2.0f);
+
+  cr_assert_not_null(result);
+  cr_assert_float_eq(result->elements[0], -8.0f, 1e-5);
+  cr_assert_float_eq(result->elements[1], 6.0f, 1e-5);
+}
+
+// Test scalar multiply when input is null on CPU
+Test(CPU_Matrix, ScalarMultiply_NullInput) {
+  Matrix* result = cpu_scalar_multiply(NULL, 2.0f);
+
+  cr_assert_null(result, "input matrix is NULL");
+}
+
+// Test large matrix scalar multiplication on PGU
+Test(CPU_Matrix, ScalarMultiply_LargeMatrix) {
+  int rows = 1000, cols = 1000;
+  Matrix* mat = create_matrix_host(rows, cols);
+  for (int i = 0; i < rows * cols; ++i) {
+    mat->elements[i] = 1.0f;
+  }
+
+  Matrix* result = cpu_scalar_multiply(mat, 3.0f);
+
+  cr_assert_not_null(result);
+  for (int i = 0; i < rows * cols; ++i) {
+    cr_assert_float_eq(result->elements[i], 3.0f, 1e-5);
+  }
+}
+
 // Test small-sized matrix addition on CPU
 Test(CPU_Matrix, Add_SmallMatrix) {
   Matrix* matA = create_matrix_host(2, 2);
@@ -288,18 +336,66 @@ Test(CPU_Matrix, Add_SmallMatrix) {
     matB->elements[i] = valuesB[i];
   }
 
-  Matrix* sum = cpu_matrix_add(matA, matB);
+  Matrix* result = cpu_matrix_add(matA, matB);
 
-  cr_assert_not_null(sum);
-  cr_assert_eq(sum->rows, 2);
-  cr_assert_eq(sum->cols, 2);
+  cr_assert_not_null(result);
+  cr_assert_eq(result->rows, 2);
+  cr_assert_eq(result->cols, 2);
 
   float expected[] = {6, 8, 10, 12};  // 2x2
   for (int i = 0; i < 4; ++i) {
-    cr_assert_float_eq(sum->elements[i], expected[i], 1e-5);
+    cr_assert_float_eq(result->elements[i], expected[i], 1e-5);
   }
 }
 
+// Test adding negative elements on CPU
+Test(CPU_Matrix, MatrixAdd_NegativeElements) {
+  Matrix* a = create_matrix_host(1, 3);
+  Matrix* b = create_matrix_host(1, 3);
+  float vals_a[] = {-1, 2, -3};
+  float vals_b[] = {4, -5, 6};
+  for (int i = 0; i < 3; ++i) {
+    a->elements[i] = vals_a[i];
+    b->elements[i] = vals_b[i];
+  }
+
+  Matrix* result = cpu_matrix_add(a, b);
+
+  cr_assert_not_null(result);
+  float expected[] = {3, -3, 3};
+  for (int i = 0; i < 3; ++i) {
+    cr_assert_float_eq(result->elements[i], expected[i], 1e-5);
+  }
+}
+
+// Test adding matrices with different dimension on CPU
+Test(CPU_Matrix, MatrixAdd_DimensionMismatch) {
+  Matrix* a = create_matrix_host(2, 2);
+  Matrix* b = create_matrix_host(3, 2);  // Different dimensions
+
+  Matrix* result = cpu_matrix_add(a, b);
+
+  cr_assert_null(result);
+}
+
+// Test adding large matrix on CPU
+Test(CPU_Matrix, MatrixAdd_LargeMatrix) {
+  int rows = 1000, cols = 1000;
+  Matrix* a = create_matrix_host(rows, cols);
+  Matrix* b = create_matrix_host(rows, cols);
+
+  for (int i = 0; i < rows * cols; ++i) {
+    a->elements[i] = 2.0f;
+    b->elements[i] = 5.0f;
+  }
+
+  Matrix* result = cpu_matrix_add(a, b);
+
+  cr_assert_not_null(result);
+  for (int i = 0; i < rows * cols; ++i) {
+    cr_assert_float_eq(result->elements[i], 7.0f, 1e-5);
+  }
+}
 // Test small-sized matrix subtraction on CPU
 Test(CPU_Matrix, Subtract_SmallMatrix) {
   Matrix* matA = create_matrix_host(2, 2);
@@ -321,5 +417,50 @@ Test(CPU_Matrix, Subtract_SmallMatrix) {
   float expected[] = {4, 4, 4, 4};  // 2x2
   for (int i = 0; i < 4; ++i) {
     cr_assert_float_eq(difference->elements[i], expected[i], 1e-5);
+  }
+}
+
+// Test subtracting negative elements on CPU
+Test(CPU_Matrix, MatrixSubtract_NegativeResults) {
+  Matrix* a = create_matrix_host(1, 2);
+  Matrix* b = create_matrix_host(1, 2);
+  a->elements[0] = 2;
+  a->elements[1] = 3;
+  b->elements[0] = 5;
+  b->elements[1] = 1;
+
+  Matrix* result = cpu_matrix_subtract(a, b);
+
+  cr_assert_not_null(result);
+  cr_assert_float_eq(result->elements[0], -3.0f, 1e-5);
+  cr_assert_float_eq(result->elements[1], 2.0f, 1e-5);
+}
+
+// Test subtracting matrices with different dimensions on CPU
+Test(CPU_Matrix, MatrixSubtract_DimensionMismatch) {
+  Matrix* a = create_matrix_host(2, 2);
+  Matrix* b = create_matrix_host(2, 3);  // Incompatible dimensions
+
+  Matrix* result = cpu_matrix_subtract(a, b);
+
+  cr_assert_null(result);
+}
+
+// Test subtracting large matrix on CPU
+Test(CPU_Matrix, MatrixSubtract_LargeMatrix) {
+  int rows = 1000, cols = 1000;
+  Matrix* a = create_matrix_host(rows, cols);
+  Matrix* b = create_matrix_host(rows, cols);
+
+  for (int i = 0; i < rows * cols; ++i) {
+    a->elements[i] = 10.0f;
+    b->elements[i] = 1.0f;
+  }
+
+  Matrix* result = cpu_matrix_subtract(a, b);
+
+  cr_assert_not_null(result);
+  for (int i = 0; i < rows * cols; ++i) {
+    cr_assert_float_eq(result->elements[i], 9.0f, 1e-5);
   }
 }
