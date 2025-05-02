@@ -1,6 +1,6 @@
 # CUDA Linear Regression
 
-Linear Regression implemented for both CPU and GPU (with CUDA) using the least squares solution, built with matrix operations libraries fors each platform. Both libraries are benchmarked to compare speed. To test the implementation, a model is trained to predict child birth weight from gestation details using this [Kaggle dataset](https://www.kaggle.com/datasets/jacopoferretti/child-weight-at-birth-and-gestation-details).
+Linear Regression implemented for both CPU and GPU (with CUDA) using the least squares solution, built with matrix operations libraries for each platform. Both libraries are benchmarked to compare speed. To test the implementation, a model is trained to predict child birth weight from gestation details using this [Kaggle dataset](https://www.kaggle.com/datasets/jacopoferretti/child-weight-at-birth-and-gestation-details).
 
 ### Features
 
@@ -23,13 +23,13 @@ Linear Regression implemented for both CPU and GPU (with CUDA) using the least s
         - `timing.c/.h`: Get the current time for benchmarking
 - `test`: Unit tests to ensure correct implementations of all five `cpu_matrix`, `gpu_matrix`, `linear_regression`, `matrix`, and `timing`
 - `data`: Data for model training and testing
-    - `X_train/X_test.csv`: Training and testing gestation data with last cols 1 for bias term
+    - `X_train/X_test.csv`: Training and testing gestation data with last column 1s for the bias term
     - `y_train/y_test.csv`: Training and testing target data
     - The remainder of the files are to test reading CSV to matrix
 
 ## Data
 
-As discussed, this [Kaggle gestation dataset](https://www.kaggle.com/datasets/jacopoferretti/child-weight-at-birth-and-gestation-details) was used to predict child birth weight. In the `data` folder the `X_test` and `X_train` are the feature datapoints and the `y_test`, and `y_train` contains the corresponding birthweights. They are split into a train test split to validate model generalization.
+As discussed, this [Kaggle gestation dataset](https://www.kaggle.com/datasets/jacopoferretti/child-weight-at-birth-and-gestation-details) was used to predict child birth weight. In the `data` folder the `X_test` and `X_train` are the feature datapoints and the `y_test`, and `y_train` contains the corresponding birthFweights. They are split into training and test sets to validate model generalization.
 
 The data columns of the feature data (X files) are as follows:
 1. Gestation length (days)
@@ -38,7 +38,7 @@ The data columns of the feature data (X files) are as follows:
 4. Mother's height (in)
 5. Mother's weight (lbs)
 6. If mother smokes
-7. 1s to be bias (y-intercept) term
+7. All 1s for the bias term (y-intercept) term
 
 The target data (y files) contain the child birthweight in ounces.
 
@@ -53,7 +53,7 @@ $ sudo apt install cuda
 ```
 Note 1: You may need to ensure this is compatible with your nvidia GPU drivers. You can find more details on the official [Nvidia documentation](https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html).
 
-Note 2: For your computer to find NVCC, you may need to add it to your PATH using an environment variable temporarily or ~/.bashrc or ~/.zshrc for persistance.
+Note 2: For your computer to find NVCC, you may need to add it to your PATH using an environment variable temporarily or ~/.bashrc or ~/.zshrc for persistence.
 
 ### Build and Run
 
