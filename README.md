@@ -68,7 +68,7 @@ $ cmake ..
 $ make
 ```
 
-If you run into issues building, you may have a different GPU architecture and need to update the top `CMakeLists.txt` `set(CMAKE_CUDA_ARCHITECTURES 75)` line. Here is a source with an explanation and list of values depending on GPU.
+If you run into issues building, you may have a different GPU architecture and need to update the top `CMakeLists.txt` `set(CMAKE_CUDA_ARCHITECTURES 75)` line. Here is a [website](https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/) with an explanation and list of values depending on GPU.
 
 Run main with:
 ```bash
