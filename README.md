@@ -2,6 +2,16 @@
 
 Linear Regression implemented for both CPU and GPU (with CUDA) using the least squares solution, built with matrix operations libraries fors each platform. Both libraries are benchmarked to compare speed. To test the implementation, a model is trained to predict child birth weight from gestation details using this [Kaggle dataset](https://www.kaggle.com/datasets/jacopoferretti/child-weight-at-birth-and-gestation-details).
 
+### Features
+
+- CPU and GPU Support: Implements core matrix operations on both CPU (C) and GPU (CUDA) backends.
+
+- Exact Least Squares Regression: Solves w = (XᵀX)⁻¹ Xᵀy using matrix operations for accurate model weights.
+
+- Benchmarking Included: Measures and compares average runtime across 100 trials on CPU and GPU.
+
+- Practical Example: Trains on real-world birth weight data and evaluates with mean absolute error.
+
 ## Structure
 
 - `src`: Implementation code
@@ -35,7 +45,7 @@ The data columns of the feature data (X files) are as follows:
 
 The target data (y files) contain the child birthweight in ounces.
 
-## Running Instruction
+## Running Instructions
 
 This project will only run on a system with an NVIDIA GPU due to the need for CUDA.
 
