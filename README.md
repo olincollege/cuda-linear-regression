@@ -5,11 +5,8 @@ Linear Regression implemented for both CPU and GPU (with CUDA) using the least s
 ### Features
 
 - CPU and GPU Support: Implements core matrix operations on both CPU (C) and GPU (CUDA) backends.
-
 - Exact Least Squares Regression: Solves w = (XᵀX)⁻¹ Xᵀy using matrix operations for accurate model weights.
-
 - Benchmarking Included: Measures and compares average runtime across 100 trials on CPU and GPU.
-
 - Practical Example: Trains on real-world birth weight data and evaluates with mean absolute error.
 
 ## Structure
@@ -45,7 +42,7 @@ The data columns of the feature data (X files) are as follows:
 
 The target data (y files) contain the child birthweight in ounces.
 
-## Running Instructions
+## Usage
 
 This project will only run on a system with an NVIDIA GPU due to the need for CUDA.
 
