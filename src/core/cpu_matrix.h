@@ -29,6 +29,38 @@ Matrix* cpu_matrix_multiply(const Matrix* left_mat, const Matrix* right_mat);
 Matrix* cpu_matrix_transpose(const Matrix* mat);
 
 /**
+ * Ensure a non-zero pivot element by row swapping if needed.
+ *
+ * Checks if the pivot element is near zero. If so, searches a lower row with
+ * a sufficiently large value in the pivot column and swaps rows in both the
+ * input and inverse matrices. If no such row is found, the matrix is not
+ * invertible.
+ *
+ * @param input_mat Pointer to the matrix being transformed.
+ * @param inverse_mat Pointer to the matrix tracking the inverse (initially
+ * identity).
+ * @param pivot_row Index of the current pivot row.
+ * @return 1 if a non-zero pivot was ensured; 0 if the matrix is not invertible.
+ */
+int unzero_pivot(Matrix* input_mat, Matrix* inverse_mat,
+                 const size_t pivot_row);
+
+/**
+ * Perform row elimination for Gauss-Jordan elimination.
+ *
+ * Eliminates all rows except the pivot row by subtracting a multiple of the
+ * pivot row from each target row. This operation is applied to both the input
+ * matrix and the identity matrix being transformed into the inverse.
+ *
+ * @param input_mat Pointer to the matrix being transformed.
+ * @param inverse_mat Pointer to the matrix tracking the inverse (initially
+ * identity).
+ * @param pivot_row Index of the current pivot row.
+ */
+void eliminate_rows(Matrix* input_mat, Matrix* inverse_mat,
+                    const size_t pivot_row);
+
+/**
  * Compute the inverse of a matrix using the CPU.
  *
  * Allocates and returns a new matrix representing the inverse. If the matrix is

@@ -45,6 +45,55 @@ Matrix* cpu_matrix_transpose(const Matrix* mat) {
   return transposed;
 }
 
+int unzero_pivot(Matrix* input_mat, Matrix* inverse_mat,
+                 const size_t pivot_row) {
+  size_t dim = input_mat->rows;
+  if (fabsf(input_mat->elements[pivot_row * dim + pivot_row]) < ZERO_THRESH) {
+    for (size_t swap_row = pivot_row + 1; swap_row < dim; swap_row++) {
+      if (fabsf(input_mat->elements[swap_row * dim + pivot_row]) >
+          ZERO_THRESH) {
+        // Swap mat pivot row and swap row for mat and identity
+        for (size_t col = 0; col < dim; col++) {
+          float temp = input_mat->elements[pivot_row * dim + col];
+          input_mat->elements[pivot_row * dim + col] =
+              input_mat->elements[swap_row * dim + col];
+          input_mat->elements[swap_row * dim + col] = temp;
+
+          temp = inverse_mat->elements[pivot_row * dim + col];
+          inverse_mat->elements[pivot_row * dim + col] =
+              inverse_mat->elements[swap_row * dim + col];
+          inverse_mat->elements[swap_row * dim + col] = temp;
+        }
+        break;
+      }
+    }
+    // If still zero after trying to swap, it isn't invertible
+    if (fabsf(input_mat->elements[pivot_row * dim + pivot_row]) < ZERO_THRESH) {
+      return 0;
+    }
+    return 1;
+  }
+}
+
+void eliminate_rows(Matrix* input_mat, Matrix* inverse_mat,
+                    const size_t pivot_row) {
+  size_t dim = input_mat->rows;
+  // Eliminate the other rows
+  for (size_t target_row = 0; target_row < dim; target_row++) {
+    if (target_row != pivot_row) {
+      float factor = input_mat->elements[target_row * dim + pivot_row];
+      for (size_t col = 0; col < dim; col++) {
+        input_mat->elements[target_row * dim + col] =
+            input_mat->elements[target_row * dim + col] -
+            factor * input_mat->elements[pivot_row * dim + col];
+        inverse_mat->elements[target_row * dim + col] =
+            inverse_mat->elements[target_row * dim + col] -
+            factor * inverse_mat->elements[pivot_row * dim + col];
+      }
+    }
+  }
+}
+
 Matrix* cpu_matrix_inverse(const Matrix* mat) {
   if (mat->cols != mat->rows) {
     return NULL;
@@ -53,75 +102,43 @@ Matrix* cpu_matrix_inverse(const Matrix* mat) {
   size_t num_elements = dim * dim;
 
   // Create identity matrix
-  Matrix* i_mat = create_matrix_host(dim, dim);
+  Matrix* inv_mat = create_matrix_host(dim, dim);
 
   for (size_t row = 0; row < dim; row++) {
     for (size_t col = 0; col < dim; col++) {
       if (row == col) {
-        i_mat->elements[row * dim + col] = (float)1;
+        inv_mat->elements[row * dim + col] = (float)1;
       } else {
-        i_mat->elements[row * dim + col] = (float)0;
+        inv_mat->elements[row * dim + col] = (float)0;
       }
     }
   }
 
   // Create a copy of the original matrix
-  Matrix* mat_c = create_matrix_host(dim, dim);
+  Matrix* input_mat = create_matrix_host(dim, dim);
   for (size_t i = 0; i < num_elements; i++) {
-    mat_c->elements[i] = mat->elements[i];
+    input_mat->elements[i] = mat->elements[i];
   }
 
   // Do gauss jordan elimination
   for (size_t pivot_row = 0; pivot_row < dim; pivot_row++) {
     // If pivot is zero, swap with lower row
-    if (fabsf(mat_c->elements[pivot_row * dim + pivot_row]) < ZERO_THRESH) {
-      for (size_t swap_row = pivot_row + 1; swap_row < dim; swap_row++) {
-        if (fabsf(mat_c->elements[swap_row * dim + pivot_row]) > ZERO_THRESH) {
-          // Swap mat_c pivot row and swap row for mat_c and identity
-          for (size_t col = 0; col < dim; col++) {
-            float temp = mat_c->elements[pivot_row * dim + col];
-            mat_c->elements[pivot_row * dim + col] =
-                mat_c->elements[swap_row * dim + col];
-            mat_c->elements[swap_row * dim + col] = temp;
+    if (unzero_pivot(input_mat, inv_mat, pivot_row) == 0) {
+      free_matrix_host(inv_mat);
+      free_matrix_host(input_mat);
+      return NULL;
+    }
 
-            temp = i_mat->elements[pivot_row * dim + col];
-            i_mat->elements[pivot_row * dim + col] =
-                i_mat->elements[swap_row * dim + col];
-            i_mat->elements[swap_row * dim + col] = temp;
-          }
-          break;
-        }
-      }
-      // If still zero after trying to swap, it isn't invertible
-      if (fabsf(mat_c->elements[pivot_row * dim + pivot_row]) < ZERO_THRESH) {
-        free_matrix_host(i_mat);
-        free_matrix_host(mat_c);
-        return NULL;
-      }
-    }
     // Normalize pivot row
-    float pivot_val = mat_c->elements[pivot_row * dim + pivot_row];
+    float pivot_val = input_mat->elements[pivot_row * dim + pivot_row];
     for (size_t col = 0; col < dim; col++) {
-      mat_c->elements[pivot_row * dim + col] /= pivot_val;
-      i_mat->elements[pivot_row * dim + col] /= pivot_val;
+      input_mat->elements[pivot_row * dim + col] /= pivot_val;
+      inv_mat->elements[pivot_row * dim + col] /= pivot_val;
     }
-    // Eliminate the other rows
-    for (size_t target_row = 0; target_row < dim; target_row++) {
-      if (target_row != pivot_row) {
-        float factor = mat_c->elements[target_row * dim + pivot_row];
-        for (size_t col = 0; col < dim; col++) {
-          mat_c->elements[target_row * dim + col] =
-              mat_c->elements[target_row * dim + col] -
-              factor * mat_c->elements[pivot_row * dim + col];
-          i_mat->elements[target_row * dim + col] =
-              i_mat->elements[target_row * dim + col] -
-              factor * i_mat->elements[pivot_row * dim + col];
-        }
-      }
-    }
+    eliminate_rows(input_mat, inv_mat, pivot_row);
   }
-  free_matrix_host(mat_c);
-  return i_mat;
+  free_matrix_host(input_mat);
+  return inv_mat;
 }
 
 Matrix* cpu_scalar_multiply(const Matrix* mat, const float scalar) {
