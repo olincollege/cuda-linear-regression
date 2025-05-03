@@ -42,8 +42,7 @@ Matrix* cpu_matrix_transpose(const Matrix* mat);
  * @param pivot_row Index of the current pivot row.
  * @return 1 if a non-zero pivot was ensured; 0 if the matrix is not invertible.
  */
-int unzero_pivot(Matrix* input_mat, Matrix* inverse_mat,
-                 const size_t pivot_row);
+int unzero_pivot(Matrix* input_mat, Matrix* inverse_mat, size_t pivot_row);
 
 /**
  * Perform row elimination for Gauss-Jordan elimination.
@@ -57,8 +56,7 @@ int unzero_pivot(Matrix* input_mat, Matrix* inverse_mat,
  * identity).
  * @param pivot_row Index of the current pivot row.
  */
-void eliminate_rows(Matrix* input_mat, Matrix* inverse_mat,
-                    const size_t pivot_row);
+void eliminate_rows(Matrix* input_mat, Matrix* inverse_mat, size_t pivot_row);
 
 /**
  * Compute the inverse of a matrix using the CPU.
