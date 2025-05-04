@@ -78,7 +78,7 @@ Matrix* cpu_matrix_inverse(const Matrix* mat);
  * @param scalar The scalar value to multiply each element by.
  * @return Pointer to the scaled matrix.
  */
-Matrix* cpu_scalar_multiply(const Matrix* mat, const float scalar);
+Matrix* cpu_scalar_multiply(const Matrix* mat, float scalar);
 
 /**
  * Add two matrices element-wise using the CPU.
