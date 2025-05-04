@@ -105,7 +105,7 @@ __global__ void matrix_add_kernel(const Matrix* mat_a, const Matrix* mat_b,
 
 Matrix* gpu_matrix_add(const Matrix* d_a, const Matrix* d_b, size_t out_rows,
                        size_t out_cols) {
-  int total_elements = d_a->rows * d_a->cols;
+  int total_elements = out_rows * out_cols;
   int threads_per_block = 256;
   int blocks = (total_elements + threads_per_block - 1) / threads_per_block;
 
