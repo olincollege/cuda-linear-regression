@@ -27,14 +27,17 @@ __global__ void matrix_multiply_kernel(const Matrix* left_mat,
 /**
  * Multiply two matrices using the GPU.
  */
-void gpu_matrix_multiply(const Matrix* d_left, const Matrix* d_right, Matrix* d_result) {
+Matrix* gpu_matrix_multiply(const Matrix* d_left, const Matrix* d_right, size_t out_cols, size_t out_rows) {
   // Set up kernel launch dimensions
   dim3 blockDim(16, 16);
-  dim3 gridDim((d_result->cols + 15) / 16, (d_result->rows + 15) / 16);
+  dim3 gridDim((out_cols + 15) / 16, (out_rows + 15) / 16);
+
+  Matrix* d_result = create_matrix_device(out_rows, out_cols);
 
   // Launch kernel
   matrix_multiply_kernel<<<gridDim, blockDim>>>(d_left, d_right, d_result);
   check_device_error("Kernel launch failed", cudaGetLastError());
+  return d_result;
 }
 
 __global__ void matrix_transpose_kernel(const Matrix* input, Matrix* output) {
@@ -47,12 +50,17 @@ __global__ void matrix_transpose_kernel(const Matrix* input, Matrix* output) {
   }
 }
 
-void gpu_matrix_transpose(const Matrix* d_input, Matrix* d_output) {
+Matrix* gpu_matrix_transpose(const Matrix* d_input, size_t out_cols, size_t out_rows) {
   // Launch kernel
   dim3 block_size(16, 16);
   dim3 grid_size((d_input->cols + 15) / 16, (d_input->rows + 15) / 16);
+
+  Matrix* d_output = create_matrix_device(out_rows, out_cols);
+
   matrix_transpose_kernel<<<grid_size, block_size>>>(d_input, d_output);
   check_device_error("matrix_transpose_kernel", cudaGetLastError());
+
+  return d_output;
 }
 
 __global__ void scalar_multiply_kernel(const Matrix* input, float scalar,
@@ -65,13 +73,17 @@ __global__ void scalar_multiply_kernel(const Matrix* input, float scalar,
   }
 }
 
-void gpu_scalar_multiply(const Matrix* d_input, float scalar, Matrix* d_output) {
+Matrix* gpu_scalar_multiply(const Matrix* d_input, float scalar, size_t out_cols, size_t out_rows) {
   int total_elements = d_input->rows * d_input->cols;
   int threads_per_block = 256;
   int blocks = (total_elements + threads_per_block - 1) / threads_per_block;
+
+  Matrix* d_output = create_matrix_device(out_rows, out_cols);
+
   scalar_multiply_kernel<<<blocks, threads_per_block>>>(d_input, scalar, d_output);
   check_device_error("scalar_multiply_kernel", cudaGetLastError());
 
+  return d_output;
 }
 
 __global__ void matrix_add_kernel(const Matrix* mat_a, const Matrix* mat_b,
@@ -85,12 +97,17 @@ __global__ void matrix_add_kernel(const Matrix* mat_a, const Matrix* mat_b,
 }
 
 
-void gpu_matrix_add(const Matrix* d_a, const Matrix* d_b, Matrix* d_result) {
+Matrix* gpu_matrix_add(const Matrix* d_a, const Matrix* d_b, size_t out_cols, size_t out_rows) {
   int total_elements = d_a->rows * d_a->cols;
   int threads_per_block = 256;
   int blocks = (total_elements + threads_per_block - 1) / threads_per_block;
+
+  Matrix* d_result = create_matrix_device(out_rows, out_cols);
+
   matrix_add_kernel<<<blocks, threads_per_block>>>(d_a, d_b, d_result);
   check_device_error("matrix_add_kernel", cudaGetLastError());
+
+  return d_result;
 }
 
 
@@ -104,10 +121,15 @@ __global__ void matrix_subtract_kernel(const Matrix* mat_a, const Matrix* mat_b,
   }
 }
 
-void gpu_matrix_subtract(const Matrix* d_a, const Matrix* d_b, Matrix* d_result) {
+Matrix* gpu_matrix_subtract(const Matrix* d_a, const Matrix* d_b, size_t out_cols, size_t out_rows) {
   int total_elements = d_a->rows * d_a->cols;
   int threads_per_block = 256;
+  
   int blocks = (total_elements + threads_per_block - 1) / threads_per_block;
+  Matrix* d_result = create_matrix_device(out_rows, out_cols);
+  
   matrix_subtract_kernel<<<blocks, threads_per_block>>>(d_a, d_b, d_result);
   check_device_error("matrix_subtract_kernel", cudaGetLastError());
+  
+  return d_result;
 }
