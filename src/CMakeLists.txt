@@ -13,5 +13,8 @@ add_subdirectory(utils)
 add_subdirectory(core)
 add_subdirectory(models)
 
-add_executable(main main.c)
-target_link_libraries(main PRIVATE linear_regression matrix cpu_matrix gpu_matrix timing)
+add_executable(regression regression.c)
+target_link_libraries(regression PRIVATE linear_regression matrix cpu_matrix)
+
+add_executable(benchmark benchmark.c)
+target_link_libraries(benchmark PRIVATE linear_regression matrix cpu_matrix gpu_matrix timing)

@@ -12,7 +12,8 @@ Linear Regression implemented for both CPU and GPU (with CUDA) using the least s
 ## Structure
 
 - `src`: Implementation code
-    - `src/main.c`: Runs linear regression and benchmarking
+    - `regression.c`: Runs linear regression on gestation dataset
+    - `benchmark.c`: Runs benchmarking on all types of matrix operations
     - `core`: Matrix operations libraries
         - `cpu_matrix.c/.h`: CPU matrix operations library
         - `gpu_matrix.cu/.h`: GPU matrix operations written in CUDA
@@ -70,8 +71,13 @@ $ make
 
 If you run into issues building, you may have a different GPU architecture and need to update the top `CMakeLists.txt` `set(CMAKE_CUDA_ARCHITECTURES 75)` line. Here is a [website](https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/) with an explanation and list of values depending on GPU.
 
-Run main with:
+Run regression with:
 ```bash
-./src/main
+./src/regression
+```
+Run benchmarking with:
+Run regression with:
+```bash
+./src/benchmarking
 ```
 
