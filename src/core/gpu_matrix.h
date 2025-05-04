@@ -13,9 +13,12 @@ extern "C" {
  *
  * @param d_left Pointer to device memory for left matrix.
  * @param d_right Pointer to device memory for right matrix.
- * @param d_result Pointer to device memory for result matrix.
+ * @param out_rows The number of rows of the output matrix.
+ * @param out_cols The number of cols of the output matrix.
+ * 
+ * @return Pointer to the product of the two matrices or NULL if operation not feasible
  */
-void gpu_matrix_multiply(const Matrix* d_left, const Matrix* d_right, Matrix* d_result);
+Matrix* gpu_matrix_multiply(const Matrix* d_left, const Matrix* d_right, size_t out_rows, size_t out_cols);
 
 /**
  * Kernel to run part of matrix multiplication.
@@ -31,9 +34,12 @@ __global__ void matrix_multiply_kernel(const Matrix* left_mat,
  * Transpose a matrix using the GPU.
  * 
  * @param d_input Pointer to device memory for input matrix.
- * @param d_output Pointer to device memory for transposed output matrix.
+ * @param out_rows The number of rows of the output matrix.
+ * @param out_cols The number of cols of the output matrix.
+ * 
+ * @return Pointer to the transposed matrix. 
  */
-void gpu_matrix_transpose(const Matrix* d_input, Matrix* d_output);
+Matrix* gpu_matrix_transpose(const Matrix* d_input, size_t out_rows, size_t out_cols);
 
 
 
@@ -50,9 +56,12 @@ __global__ void matrix_transpose_kernel(const Matrix* input, Matrix* output);
  * 
  * @param d_input Pointer to device memory for input matrix.
  * @param scalar Scalar multiplier.
- * @param d_output Pointer to device memory for result matrix.
+ * @param out_rows The number of rows of the output matrix.
+ * @param out_cols The number of cols of the output matrix.
+ * 
+ * @return Pointer to the product of the matrix and scalar value. 
  */
-void gpu_scalar_multiply(const Matrix* d_input, float scalar, Matrix* d_output);
+Matrix* gpu_scalar_multiply(const Matrix* d_input, float scalar, size_t out_rows, size_t out_cols);
 
 
 /**
@@ -70,9 +79,12 @@ __global__ void scalar_multiply_kernel(const Matrix* input, const float scalar,
  *
  * @param d_a Pointer to device memory for first matrix.
  * @param d_b Pointer to device memory for second matrix.
- * @param d_result Pointer to device memory for result matrix.
+ * @param out_rows The number of rows of the output matrix.
+ * @param out_cols The number of cols of the output matrix.
+ * 
+ * @return Pointer to the sum of the two matrices. 
  */
-void gpu_matrix_add(const Matrix* d_a, const Matrix* d_b, Matrix* d_result);
+Matrix* gpu_matrix_add(const Matrix* d_a, const Matrix* d_b, size_t out_rows, size_t out_cols);
 
 /**
  * Kernel to perform element-wise matrix addition.
@@ -88,9 +100,12 @@ __global__ void matrix_add_kernel(const Matrix* mat_a, const Matrix* mat_b,
  * Subtract one matrix from another element-wise using the GPU.
  * @param d_a Pointer to device memory for first matrix.
  * @param d_b Pointer to device memory for second matrix.
- * @param d_result Pointer to device memory for result matrix.
+ * @param out_rows The number of rows of the output matrix.
+ * @param out_cols The number of cols of the output matrix.
+ * 
+ * @return Pointer to the transposed matrix. 
  */
-void gpu_matrix_subtract(const Matrix* d_a, const Matrix* d_b, Matrix* d_result);
+Matrix* gpu_matrix_subtract(const Matrix* d_a, const Matrix* d_b, size_t out_rows, size_t out_cols);
 
 /**
  * Kernel to perform element-wise matrix subtraction.
