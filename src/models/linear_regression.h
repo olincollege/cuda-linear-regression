@@ -33,12 +33,15 @@ Matrix* cpu_regression(const Matrix* X_mat, const Matrix* y_mat);
  * possible, it dynamically allocates the weight matrix. The caller is
  * responsible for freeing.
  *
- * @param X_mat Pointer to the input matrix (n_samples x n_features)
- * @param y_mat Pointer to the target matrix (n_samples x 1)
- * @return Pointer to the resulting weight matrix on host (n_features x 1)
+ * @param X_mat Pointer to the input matrix on device (n_samples x n_features)
+ * @param y_mat Pointer to the target matrix on device (n_samples x 1)
+ * @param X_rows Number of rows in X_mat (n_samples)
+ * @param X_cols Number of cols in X_mat (n_features)
+ * @return Pointer to the resulting weight matrix on device (n_features x 1)
  * or NULL
  */
-Matrix* gpu_regression(const Matrix* X_mat, const Matrix* y_mat);
+Matrix* gpu_regression(const Matrix* d_X_mat, const Matrix* d_y_mat,
+                       size_t X_rows, size_t X_cols);
 
 /**
  * Find mean absolute error loss between target and ground truth matrices

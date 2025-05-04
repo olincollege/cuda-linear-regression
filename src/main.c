@@ -34,20 +34,25 @@ int main(void) {
   printf("Average CPU time: %f\n", cpu_avg_time);
 
   // Benchmark GPU
+  Matrix* d_X_train = copy_matrix_host_to_device(X_train);
+  Matrix* d_y_train = copy_matrix_host_to_device(y_train);
+
   // Warm up
   for (size_t i = 0; i < num_runs; i++) {
-    Matrix* weights = gpu_regression(X_train, y_train);
-    free_matrix_host(weights);
+    Matrix* d_weights =
+        gpu_regression(d_X_train, d_y_train, X_train->rows, X_train->cols);
+    free_matrix_device(d_weights);
   }
 
   // Real GPU trial
   double gpu_total_time = 0;
   for (size_t i = 0; i < num_runs; i++) {
     double start_time = get_current_time();
-    Matrix* weights = gpu_regression(X_train, y_train);
+    Matrix* d_weights =
+        gpu_regression(d_X_train, d_y_train, X_train->rows, X_train->cols);
     double end_time = get_current_time();
     gpu_total_time += end_time - start_time;
-    free_matrix_host(weights);
+    free_matrix_device(d_weights);
   }
   double gpu_avg_time = gpu_total_time / (double)num_runs;
   printf("Average GPU time: %f\n", gpu_avg_time);
@@ -78,5 +83,7 @@ int main(void) {
   free_matrix_host(y_train);
   free_matrix_host(X_test);
   free_matrix_host(y_test);
+  free_matrix_device(d_X_train);
+  free_matrix_device(d_y_train);
   return 0;
 }
