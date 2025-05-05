@@ -278,8 +278,8 @@ Test(GPU_Matrix, Transpose_LargeMatrix) {
   Matrix* result = copy_matrix_device_to_host(d_result);
 
   cr_assert_not_null(result);
-  cr_assert_eq(result->rows, cols);
-  cr_assert_eq(result->cols, rows);
+  cr_assert_eq(result->rows, rows);
+  cr_assert_eq(result->cols, cols);
 
   cr_assert_float_eq(result->elements[0], mat->elements[0], 1e-5);
   cr_assert_float_eq(result->elements[1], mat->elements[cols], 1e-5);
