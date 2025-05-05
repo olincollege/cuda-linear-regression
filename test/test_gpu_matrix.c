@@ -481,12 +481,17 @@ Test(GPU_Matrix, MatrixAdd_DimensionMismatch) {
   Matrix* mat_a = create_matrix_host(2, 2);
   Matrix* mat_b = create_matrix_host(3, 2);  // Different dimensions
 
-  Matrix* result = gpu_matrix_add(mat_a, mat_b, 2, 2);
+  Matrix* d_mat_a = copy_matrix_host_to_device(mat_a);
+  Matrix* d_mat_b = copy_matrix_host_to_device(mat_b);
+
+  Matrix* result = gpu_matrix_add(d_mat_a, d_mat_b, 2, 2);
 
   cr_assert_null(result);
 
   free_matrix_host(mat_a);
   free_matrix_host(mat_b);
+  free_matrix_device(d_mat_a);
+  free_matrix_device(d_mat_b);
 }
 
 // Test adding large matrix on GPU
@@ -579,14 +584,19 @@ Test(GPU_Matrix, MatrixSubtract_NegativeResults) {
 // Test subtracting matrices with different dimensions on GPU
 Test(GPU_Matrix, MatrixSubtract_DimensionMismatch) {
   Matrix* mat_a = create_matrix_host(2, 2);
-  Matrix* mat_b = create_matrix_host(2, 3);  // Incompatible dimensions
+  Matrix* mat_b = create_matrix_host(3, 2);  // Different dimensions
 
-  Matrix* result = gpu_matrix_subtract(mat_a, mat_b, 2, 3);
+  Matrix* d_mat_a = copy_matrix_host_to_device(mat_a);
+  Matrix* d_mat_b = copy_matrix_host_to_device(mat_b);
+
+  Matrix* result = gpu_matrix_subtract(d_mat_a, d_mat_b, 2, 2);
 
   cr_assert_null(result);
 
   free_matrix_host(mat_a);
   free_matrix_host(mat_b);
+  free_matrix_device(d_mat_a);
+  free_matrix_device(d_mat_b);
 }
 
 // Test subtracting large matrix on GPU
