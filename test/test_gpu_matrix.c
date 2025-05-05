@@ -367,13 +367,6 @@ Test(GPU_Matrix, ScalarMultiply_Negative) {
   free_matrix_device(d_result);
 }
 
-// // Test scalar multiply when input is null on GPU
-// Test(GPU_Matrix, ScalarMultiply_NullInput) {
-//   Matrix* result = gpu_scalar_multiply(NULL, 2.0f, 0, 0);
-
-//   cr_assert_null(result, "input matrix is NULL");
-// }
-
 // Test large matrix scalar multiplication on GPU
 Test(GPU_Matrix, ScalarMultiply_LargeMatrix) {
   int rows = 1000, cols = 1000;
@@ -458,18 +451,18 @@ Test(GPU_Matrix, MatrixAdd_NegativeElements) {
   free_matrix_device(d_result);
 }
 
-// // Test adding matrices with different dimension on GPU
-// Test(GPU_Matrix, MatrixAdd_DimensionMismatch) {
-//   Matrix* A = create_matrix_host(2, 2);
-//   Matrix* B = create_matrix_host(3, 2);  // Different dimensions
+// Test adding matrices with different dimension on GPU
+Test(GPU_Matrix, MatrixAdd_DimensionMismatch) {
+  Matrix* A = create_matrix_host(2, 2);
+  Matrix* B = create_matrix_host(3, 2);  // Different dimensions
 
-//   Matrix* result = gpu_matrix_add(A, B);
+  Matrix* result = gpu_matrix_add(A, B, 2, 2);
 
-//   cr_assert_null(result);
+  cr_assert_null(result);
 
-//   free_matrix_host(A);
-//   free_matrix_host(B);
-// }
+  free_matrix_host(A);
+  free_matrix_host(B);
+}
 
 // Test adding large matrix on GPU
 Test(GPU_Matrix, MatrixAdd_LargeMatrix) {
@@ -557,18 +550,18 @@ Test(GPU_Matrix, MatrixSubtract_NegativeResults) {
   free_matrix_device(d_result);
 }
 
-// // Test subtracting matrices with different dimensions on GPU
-// Test(GPU_Matrix, MatrixSubtract_DimensionMismatch) {
-//   Matrix* a = create_matrix_host(2, 2);
-//   Matrix* b = create_matrix_host(2, 3);  // Incompatible dimensions
+// Test subtracting matrices with different dimensions on GPU
+Test(GPU_Matrix, MatrixSubtract_DimensionMismatch) {
+  Matrix* a = create_matrix_host(2, 2);
+  Matrix* b = create_matrix_host(2, 3);  // Incompatible dimensions
 
-//   Matrix* result = gpu_matrix_subtract(a, b, 2, 3);
+  Matrix* result = gpu_matrix_subtract(a, b, 2, 3);
 
-//   cr_assert_null(result);
+  cr_assert_null(result);
 
-//   free_matrix_host(a);
-//   free_matrix_host(b);
-// }
+  free_matrix_host(a);
+  free_matrix_host(b);
+}
 
 // Test subtracting large matrix on GPU
 Test(GPU_Matrix, MatrixSubtract_LargeMatrix) {
