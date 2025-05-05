@@ -10,10 +10,12 @@
 __global__ void matrix_multiply_kernel(const Matrix* left_mat,
                                        const Matrix* right_mat,
                                        Matrix* result, bool* error_flag) {
+  // Check for incompatible matrix size                                      
   if (left_mat-> cols != right_mat-> rows){
     *error_flag = true;
     return;
   }
+
   int row = blockIdx.y * blockDim.y + threadIdx.y;
   int col = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -37,17 +39,18 @@ Matrix* gpu_matrix_multiply(const Matrix* d_left, const Matrix* d_right,
   dim3 blockDim(16, 16);
   dim3 gridDim((out_cols + 15) / 16, (out_rows + 15) / 16);
   Matrix* d_result = create_matrix_device(out_rows, out_cols);
-  
+
+  // Set up error flag
   bool* d_error_flag;
   cudaMalloc(&d_error_flag, sizeof(bool));
   cudaMemset(d_error_flag, 0, sizeof(bool));
-
 
   // Launch kernel
   matrix_multiply_kernel<<<gridDim, blockDim>>>(d_left, d_right, d_result, d_error_flag);
   check_device_error("Kernel launch failed", cudaGetLastError());
   cudaDeviceSynchronize();
-
+  
+  // Check for error 
   bool error_flag = false;
   cudaMemcpy(&error_flag, d_error_flag, sizeof(bool), cudaMemcpyDeviceToHost);
   cudaFree(d_error_flag);
@@ -112,6 +115,7 @@ Matrix* gpu_scalar_multiply(const Matrix* d_input, float scalar,
 
 __global__ void matrix_add_kernel(const Matrix* mat_a, const Matrix* mat_b,
                                   Matrix* result, bool* error_flag) {
+  // Check for incompatible matrix size                                      
   if (mat_a-> cols != mat_b-> cols || mat_a-> rows != mat_b-> rows){
     *error_flag = true;
     return;
@@ -131,16 +135,19 @@ Matrix* gpu_matrix_add(const Matrix* d_a, const Matrix* d_b, size_t out_rows,
   int blocks = (total_elements + threads_per_block - 1) / threads_per_block;
 
   Matrix* d_result = create_matrix_device(out_rows, out_cols);
-
+  
+  // Set up error flag
   bool* d_error_flag;
   cudaMalloc(&d_error_flag, sizeof(bool));
   cudaMemset(d_error_flag, 0, sizeof(bool));
 
+  // Launch kernel
   matrix_add_kernel<<<blocks, threads_per_block>>>(d_a, d_b, d_result, d_error_flag);
   check_device_error("matrix_add_kernel", cudaGetLastError());
   cudaDeviceSynchronize();
 
-    bool error_flag = false;
+  // Check for error 
+  bool error_flag = false;
   cudaMemcpy(&error_flag, d_error_flag, sizeof(bool), cudaMemcpyDeviceToHost);
   cudaFree(d_error_flag);
 
@@ -154,6 +161,7 @@ Matrix* gpu_matrix_add(const Matrix* d_a, const Matrix* d_b, size_t out_rows,
 
 __global__ void matrix_subtract_kernel(const Matrix* mat_a, const Matrix* mat_b,
                                        Matrix* result, bool* error_flag) {
+  // Check for incompatible matrix size    
   if (mat_a-> cols != mat_b-> cols || mat_a-> rows != mat_b-> rows){
     *error_flag = true;
     return;
@@ -171,18 +179,20 @@ Matrix* gpu_matrix_subtract(const Matrix* d_a, const Matrix* d_b,
                             size_t out_rows, size_t out_cols) {
   int total_elements = out_rows * out_cols;
   int threads_per_block = 256;
-
   int blocks = (total_elements + threads_per_block - 1) / threads_per_block;
   Matrix* d_result = create_matrix_device(out_rows, out_cols);
-
+  
+  // Set up error flag
   bool* d_error_flag;
   cudaMalloc(&d_error_flag, sizeof(bool));
   cudaMemset(d_error_flag, 0, sizeof(bool));
 
+  // Launch kernel
   matrix_subtract_kernel<<<blocks, threads_per_block>>>(d_a, d_b, d_result, d_error_flag);
   check_device_error("matrix_subtract_kernel", cudaGetLastError());
   cudaDeviceSynchronize();
   
+  // Check for error
   bool error_flag = false;
   cudaMemcpy(&error_flag, d_error_flag, sizeof(bool), cudaMemcpyDeviceToHost);
   cudaFree(d_error_flag);
