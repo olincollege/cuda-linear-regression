@@ -10,35 +10,38 @@
 
 // Test small-sized matrix multiplication on GPU
 Test(GPU_Matrix, Multiply_SmallMatrix) {
-  Matrix* A = create_matrix_host(2, 3);
-  Matrix* B = create_matrix_host(3, 2);
+  Matrix* mat_a = create_matrix_host(2, 3);
+  Matrix* mat_b = create_matrix_host(3, 2);
 
   float a_vals[] = {1, 2, 3, 4, 5, 6};     // 2x3
   float b_vals[] = {7, 8, 9, 10, 11, 12};  // 3x2
 
-  for (int i = 0; i < 6; ++i) A->elements[i] = a_vals[i];
-  for (int i = 0; i < 6; ++i) B->elements[i] = b_vals[i];
-
-  // Copy A and B to device
-  Matrix* d_A = copy_matrix_host_to_device(A);
-  Matrix* d_B = copy_matrix_host_to_device(B);
+  for (size_t i = 0; i < 6; ++i) {
+    mat_a->elements[i] = a_vals[i];
+  }
+  for (size_t i = 0; i < 6; ++i) {
+    mat_b->elements[i] = b_vals[i];
+  }
+  // Copy mat_a and mat_b to device
+  Matrix* d_mat_a = copy_matrix_host_to_device(mat_a);
+  Matrix* d_mat_b = copy_matrix_host_to_device(mat_b);
 
   // Run GPU multiplication
-  Matrix* d_C = gpu_matrix_multiply(d_A, d_B, 2, 2);
-  Matrix* C = copy_matrix_device_to_host(d_C);
+  Matrix* d_C = gpu_matrix_multiply(d_mat_a, d_mat_b, 2, 2);
+  Matrix* mat_C = copy_matrix_device_to_host(d_C);
 
   // Expected result
   float expected[] = {58, 64, 139, 154};
-  for (int i = 0; i < 4; ++i) {
-    cr_assert_float_eq(C->elements[i], expected[i], 1e-5);
+  for (size_t i = 0; i < 4; ++i) {
+    cr_assert_float_eq(mat_C->elements[i], expected[i], 1e-5);
   }
 
   // Free all matrices
-  free_matrix_host(A);
-  free_matrix_host(B);
-  free_matrix_host(C);
-  free_matrix_device(d_A);
-  free_matrix_device(d_B);
+  free_matrix_host(mat_a);
+  free_matrix_host(mat_b);
+  free_matrix_host(mat_C);
+  free_matrix_device(d_mat_a);
+  free_matrix_device(d_mat_b);
   free_matrix_device(d_C);
 }
 
@@ -46,11 +49,14 @@ Test(GPU_Matrix, Multiply_SmallMatrix) {
 Test(GPU_Matrix, Multiply_IdentityMatrix) {
   Matrix* mat = create_matrix_host(2, 2);
   float values[] = {1, 2, 3, 4};
-  for (int i = 0; i < 4; ++i) mat->elements[i] = values[i];
-
+  for (size_t i = 0; i < 4; ++i) {
+    mat->elements[i] = values[i];
+  }
   Matrix* identity = create_matrix_host(2, 2);
   float identity_values[] = {1, 0, 0, 1};
-  for (int i = 0; i < 4; ++i) identity->elements[i] = identity_values[i];
+  for (size_t i = 0; i < 4; ++i) {
+    identity->elements[i] = identity_values[i];
+  }
 
   Matrix* d_mat = copy_matrix_host_to_device(mat);
   Matrix* d_identity = copy_matrix_host_to_device(identity);
@@ -59,7 +65,7 @@ Test(GPU_Matrix, Multiply_IdentityMatrix) {
   Matrix* result = copy_matrix_device_to_host(d_result);
 
   cr_assert_not_null(result);
-  for (int i = 0; i < 4; ++i) {
+  for (size_t i = 0; i < 4; ++i) {
     cr_assert_float_eq(result->elements[i], values[i], 1e-5);
   }
 
@@ -75,10 +81,14 @@ Test(GPU_Matrix, Multiply_IdentityMatrix) {
 Test(GPU_Matrix, Multiply_ZeroMatrix) {
   Matrix* mat = create_matrix_host(2, 2);
   float values[] = {5, 6, 7, 8};
-  for (int i = 0; i < 4; ++i) mat->elements[i] = values[i];
+  for (size_t i = 0; i < 4; ++i) {
+    mat->elements[i] = values[i];
+  }
 
   Matrix* zero = create_matrix_host(2, 2);
-  for (int i = 0; i < 4; ++i) zero->elements[i] = 0.0f;
+  for (size_t i = 0; i < 4; ++i) {
+    zero->elements[i] = 0.0F;
+  }
   Matrix* d_mat = copy_matrix_host_to_device(mat);
   Matrix* d_zero = copy_matrix_host_to_device(zero);
 
@@ -86,8 +96,8 @@ Test(GPU_Matrix, Multiply_ZeroMatrix) {
   Matrix* result = copy_matrix_device_to_host(d_result);
 
   cr_assert_not_null(result);
-  for (int i = 0; i < 4; ++i) {
-    cr_assert_float_eq(result->elements[i], 0.0f, 1e-5);
+  for (size_t i = 0; i < 4; ++i) {
+    cr_assert_float_eq(result->elements[i], 0.0F, 1e-5);
   }
 
   free_matrix_host(mat);
@@ -100,73 +110,81 @@ Test(GPU_Matrix, Multiply_ZeroMatrix) {
 
 // Test invalid matrix multiplication on GPU
 Test(GPU_Matrix, Multiply_MismatchedDimensions) {
-  Matrix* A = create_matrix_host(2, 3);
-  Matrix* B = create_matrix_host(4, 2);  // incompatible
+  Matrix* mat_a = create_matrix_host(2, 3);
+  Matrix* mat_b = create_matrix_host(4, 2);  // incompatible
 
-  Matrix* d_A = copy_matrix_host_to_device(A);
-  Matrix* d_B = copy_matrix_host_to_device(B);
+  Matrix* d_mat_a = copy_matrix_host_to_device(mat_a);
+  Matrix* d_mat_b = copy_matrix_host_to_device(mat_b);
 
-  Matrix* d_result = gpu_matrix_multiply(d_A, d_B, 2, 2);
+  Matrix* d_result = gpu_matrix_multiply(d_mat_a, d_mat_b, 2, 2);
 
   cr_assert_null(d_result);
 
-  free_matrix_host(A);
-  free_matrix_host(B);
-  free_matrix_device(d_A);
-  free_matrix_device(d_B);
+  free_matrix_host(mat_a);
+  free_matrix_host(mat_b);
+  free_matrix_device(d_mat_a);
+  free_matrix_device(d_mat_b);
 }
 
 // Test large matrix multiplication on GPU
 Test(GPU_Matrix, Multiply_LargeMatrix) {
-  Matrix* A = create_matrix_host(100, 200);
-  Matrix* B = create_matrix_host(200, 50);
+  Matrix* mat_a = create_matrix_host(100, 200);
+  Matrix* mat_b = create_matrix_host(200, 50);
 
-  for (int i = 0; i < 100 * 200; ++i) A->elements[i] = 1.0f;
-  for (int i = 0; i < 200 * 50; ++i) B->elements[i] = 1.0f;
-  Matrix* d_A = copy_matrix_host_to_device(A);
-  Matrix* d_B = copy_matrix_host_to_device(B);
-  Matrix* d_result = gpu_matrix_multiply(d_A, d_B, 100, 50);
+  for (size_t i = 0; i < (size_t)(100 * 200); ++i) {
+    mat_a->elements[i] = 1.0F;
+  }
+  for (size_t i = 0; i < (size_t)(200 * 50); ++i) {
+    mat_b->elements[i] = 1.0F;
+  }
+  Matrix* d_mat_a = copy_matrix_host_to_device(mat_a);
+  Matrix* d_mat_b = copy_matrix_host_to_device(mat_b);
+  Matrix* d_result = gpu_matrix_multiply(d_mat_a, d_mat_b, 100, 50);
   Matrix* result = copy_matrix_device_to_host(d_result);
 
   cr_assert_not_null(result);
   cr_assert_eq(result->rows, 100);
   cr_assert_eq(result->cols, 50);
 
-  for (int i = 0; i < result->rows * result->cols; ++i) {
-    cr_assert_float_eq(result->elements[i], 200.0f, 1e-3);
+  for (size_t i = 0; i < result->rows * result->cols; ++i) {
+    cr_assert_float_eq(result->elements[i], 200.0F, 1e-3);
   }
 
-  free_matrix_host(A);
-  free_matrix_host(B);
+  free_matrix_host(mat_a);
+  free_matrix_host(mat_b);
   free_matrix_host(result);
-  free_matrix_device(d_A);
-  free_matrix_device(d_B);
+  free_matrix_device(d_mat_a);
+  free_matrix_device(d_mat_b);
   free_matrix_device(d_result);
 }
 
 // Test non-square matrix multiplication on GPU
 Test(GPU_Matrix, Multiply_NonSquareMatrix) {
-  Matrix* A = create_matrix_host(2, 4);
-  Matrix* B = create_matrix_host(4, 3);
+  Matrix* mat_a = create_matrix_host(2, 4);
+  Matrix* mat_b = create_matrix_host(4, 3);
 
-  for (int i = 0; i < 8; ++i) A->elements[i] = i + 1;
-  for (int i = 0; i < 12; ++i) B->elements[i] = i + 1;
+  for (size_t i = 0; i < 8; ++i) {
+    mat_a->elements[i] = (float)(i + 1);
+  }
+  for (size_t i = 0; i < 12; ++i) {
+    mat_b->elements[i] = (float)(i + 1);
+  }
 
-  Matrix* d_A = copy_matrix_host_to_device(A);
-  Matrix* d_B = copy_matrix_host_to_device(B);
+  Matrix* d_mat_a = copy_matrix_host_to_device(mat_a);
+  Matrix* d_mat_b = copy_matrix_host_to_device(mat_b);
 
-  Matrix* d_result = gpu_matrix_multiply(d_A, d_B, 2, 3);
+  Matrix* d_result = gpu_matrix_multiply(d_mat_a, d_mat_b, 2, 3);
   Matrix* result = copy_matrix_device_to_host(d_result);
 
   cr_assert_not_null(result);
   cr_assert_eq(result->rows, 2);
   cr_assert_eq(result->cols, 3);
 
-  free_matrix_host(A);
-  free_matrix_host(B);
+  free_matrix_host(mat_a);
+  free_matrix_host(mat_b);
   free_matrix_host(result);
-  free_matrix_device(d_A);
-  free_matrix_device(d_B);
+  free_matrix_device(d_mat_a);
+  free_matrix_device(d_mat_b);
   free_matrix_device(d_result);
 }
 
@@ -174,7 +192,9 @@ Test(GPU_Matrix, Multiply_NonSquareMatrix) {
 Test(GPU_Matrix, Transpose_SmallMatrix) {
   Matrix* mat = create_matrix_host(2, 3);
   float values[] = {1, 2, 3, 4, 5, 6};  // 2x3
-  for (int i = 0; i < 6; ++i) mat->elements[i] = values[i];
+  for (size_t i = 0; i < 6; ++i) {
+    mat->elements[i] = values[i];
+  }
 
   Matrix* d_mat = copy_matrix_host_to_device(mat);
 
@@ -186,7 +206,7 @@ Test(GPU_Matrix, Transpose_SmallMatrix) {
   cr_assert_eq(transposed->cols, 2);
 
   float expected[] = {1, 4, 2, 5, 3, 6};  // Transposed 3x2
-  for (int i = 0; i < 6; ++i) {
+  for (size_t i = 0; i < 6; ++i) {
     cr_assert_float_eq(transposed->elements[i], expected[i], 1e-5);
   }
 
@@ -200,7 +220,9 @@ Test(GPU_Matrix, Transpose_SmallMatrix) {
 Test(GPU_Matrix, Transpose_IdentityMatrix) {
   Matrix* mat = create_matrix_host(3, 3);
   float values[] = {1, 0, 0, 0, 1, 0, 0, 0, 1};  // 3x3 Identity
-  for (int i = 0; i < 9; ++i) mat->elements[i] = values[i];
+  for (size_t i = 0; i < 9; ++i) {
+    mat->elements[i] = values[i];
+  }
   Matrix* d_mat = copy_matrix_host_to_device(mat);
 
   Matrix* d_result = gpu_matrix_transpose(d_mat, 3, 3);
@@ -210,7 +232,7 @@ Test(GPU_Matrix, Transpose_IdentityMatrix) {
   cr_assert_not_null(result);
   cr_assert_eq(result->rows, 3);
   cr_assert_eq(result->cols, 3);
-  for (int i = 0; i < 9; ++i) {
+  for (size_t i = 0; i < 9; ++i) {
     cr_assert_float_eq(result->elements[i], values[i], 1e-5);
   }
 
@@ -221,9 +243,9 @@ Test(GPU_Matrix, Transpose_IdentityMatrix) {
 }
 
 // Test single value matrix transpose on GPU
-Test(GPU_Matrix, Transpose_OneByOneMatrix) {
+Test(GPU_Matrix, Transpose_SingleMatrix) {
   Matrix* mat = create_matrix_host(1, 1);
-  mat->elements[0] = 42.0f;
+  mat->elements[0] = 42.0F;
 
   Matrix* d_mat = copy_matrix_host_to_device(mat);
 
@@ -234,7 +256,7 @@ Test(GPU_Matrix, Transpose_OneByOneMatrix) {
   cr_assert_not_null(result);
   cr_assert_eq(result->rows, 1);
   cr_assert_eq(result->cols, 1);
-  cr_assert_float_eq(result->elements[0], 42.0f, 1e-5);
+  cr_assert_float_eq(result->elements[0], 42.0F, 1e-5);
 
   free_matrix_host(mat);
   free_matrix_host(result);
@@ -244,15 +266,15 @@ Test(GPU_Matrix, Transpose_OneByOneMatrix) {
 
 // Test large matrix transpose on GPU
 Test(GPU_Matrix, Transpose_LargeMatrix) {
-  int rows = 100;
-  int cols = 200;
+  size_t rows = 100;
+  size_t cols = 200;
   Matrix* mat = create_matrix_host(rows, cols);
 
-  for (int i = 0; i < rows * cols; ++i) {
+  for (size_t i = 0; i < rows * cols; ++i) {
     mat->elements[i] = (float)i;
   }
   Matrix* d_mat = copy_matrix_host_to_device(mat);
-  Matrix* d_result = gpu_matrix_transpose(d_mat, cols, rows);
+  Matrix* d_result = gpu_matrix_transpose(d_mat, rows, cols);
   Matrix* result = copy_matrix_device_to_host(d_result);
 
   cr_assert_not_null(result);
@@ -271,7 +293,9 @@ Test(GPU_Matrix, Transpose_LargeMatrix) {
 // Test zero matrix transpose on GPU
 Test(GPU_Matrix, Transpose_ZeroMatrix) {
   Matrix* mat = create_matrix_host(3, 4);
-  for (int i = 0; i < 12; ++i) mat->elements[i] = 0.0f;
+  for (size_t i = 0; i < 12; ++i) {
+    mat->elements[i] = 0.0F;
+  }
 
   Matrix* d_mat = copy_matrix_host_to_device(mat);
 
@@ -283,8 +307,8 @@ Test(GPU_Matrix, Transpose_ZeroMatrix) {
   cr_assert_eq(result->rows, 4);
   cr_assert_eq(result->cols, 3);
 
-  for (int i = 0; i < 12; ++i) {
-    cr_assert_float_eq(result->elements[i], 0.0f, 1e-5);
+  for (size_t i = 0; i < 12; ++i) {
+    cr_assert_float_eq(result->elements[i], 0.0F, 1e-5);
   }
 
   free_matrix_host(mat);
@@ -298,10 +322,10 @@ Test(GPU_Matrix, ScalarMultiply_SmallMatrix) {
   Matrix* mat = create_matrix_host(2, 2);
 
   float values[] = {1, 2, 3, 4};  // 2x2
-  for (int i = 0; i < 4; ++i) {
+  for (size_t i = 0; i < 4; ++i) {
     mat->elements[i] = values[i];
   }
-  float scalar = 2.0f;
+  float scalar = 2.0F;
 
   Matrix* d_mat = copy_matrix_host_to_device(mat);
 
@@ -313,7 +337,7 @@ Test(GPU_Matrix, ScalarMultiply_SmallMatrix) {
   cr_assert_eq(result->rows, 2);
   cr_assert_eq(result->cols, 2);
 
-  for (int i = 0; i < 4; ++i) {
+  for (size_t i = 0; i < 4; ++i) {
     cr_assert_float_eq(result->elements[i], expected[i], 1e-5);
   }
 
@@ -332,13 +356,13 @@ Test(GPU_Matrix, ScalarMultiply_Zero) {
 
   Matrix* d_mat = copy_matrix_host_to_device(mat);
 
-  Matrix* d_result = gpu_scalar_multiply(d_mat, 0.0f, 1, 3);
+  Matrix* d_result = gpu_scalar_multiply(d_mat, 0.0F, 1, 3);
 
   Matrix* result = copy_matrix_device_to_host(d_result);
 
   cr_assert_not_null(result);
-  for (int i = 0; i < 3; ++i) {
-    cr_assert_float_eq(result->elements[i], 0.0f, 1e-5);
+  for (size_t i = 0; i < 3; ++i) {
+    cr_assert_float_eq(result->elements[i], 0.0F, 1e-5);
   }
 
   free_matrix_host(mat);
@@ -354,12 +378,12 @@ Test(GPU_Matrix, ScalarMultiply_Negative) {
   mat->elements[1] = -3;
 
   Matrix* d_mat = copy_matrix_host_to_device(mat);
-  Matrix* d_result = gpu_scalar_multiply(d_mat, -2.0f, 2, 1);
+  Matrix* d_result = gpu_scalar_multiply(d_mat, -2.0F, 2, 1);
   Matrix* result = copy_matrix_device_to_host(d_result);
 
   cr_assert_not_null(result);
-  cr_assert_float_eq(result->elements[0], -8.0f, 1e-5);
-  cr_assert_float_eq(result->elements[1], 6.0f, 1e-5);
+  cr_assert_float_eq(result->elements[0], -8.0F, 1e-5);
+  cr_assert_float_eq(result->elements[1], 6.0F, 1e-5);
 
   free_matrix_host(mat);
   free_matrix_host(result);
@@ -369,18 +393,19 @@ Test(GPU_Matrix, ScalarMultiply_Negative) {
 
 // Test large matrix scalar multiplication on GPU
 Test(GPU_Matrix, ScalarMultiply_LargeMatrix) {
-  int rows = 1000, cols = 1000;
+  size_t rows = 1000;
+  size_t cols = 1000;
   Matrix* mat = create_matrix_host(rows, cols);
-  for (int i = 0; i < rows * cols; ++i) {
-    mat->elements[i] = 1.0f;
+  for (size_t i = 0; i < rows * cols; ++i) {
+    mat->elements[i] = 1.0F;
   }
   Matrix* d_mat = copy_matrix_host_to_device(mat);
-  Matrix* d_result = gpu_scalar_multiply(d_mat, 3.0f, rows, cols);
+  Matrix* d_result = gpu_scalar_multiply(d_mat, 3.0F, rows, cols);
   Matrix* result = copy_matrix_device_to_host(d_result);
 
   cr_assert_not_null(result);
-  for (int i = 0; i < rows * cols; ++i) {
-    cr_assert_float_eq(result->elements[i], 3.0f, 1e-5);
+  for (size_t i = 0; i < rows * cols; ++i) {
+    cr_assert_float_eq(result->elements[i], 3.0F, 1e-5);
   }
 
   free_matrix_host(mat);
@@ -391,18 +416,18 @@ Test(GPU_Matrix, ScalarMultiply_LargeMatrix) {
 
 // Test small-sized matrix addition on GPU
 Test(GPU_Matrix, Add_SmallMatrix) {
-  Matrix* A = create_matrix_host(2, 2);
-  Matrix* B = create_matrix_host(2, 2);
+  Matrix* mat_a = create_matrix_host(2, 2);
+  Matrix* mat_b = create_matrix_host(2, 2);
 
-  float valuesA[] = {1, 2, 3, 4};  // 2x2
-  float valuesB[] = {5, 6, 7, 8};  // 2x2
-  for (int i = 0; i < 4; ++i) {
-    A->elements[i] = valuesA[i];
-    B->elements[i] = valuesB[i];
+  float values_a[] = {1, 2, 3, 4};  // 2x2
+  float values_b[] = {5, 6, 7, 8};  // 2x2
+  for (size_t i = 0; i < 4; ++i) {
+    mat_a->elements[i] = values_a[i];
+    mat_b->elements[i] = values_b[i];
   }
-  Matrix* d_A = copy_matrix_host_to_device(A);
-  Matrix* d_B = copy_matrix_host_to_device(B);
-  Matrix* d_result = gpu_matrix_add(d_A, d_B, 2, 2);
+  Matrix* d_mat_a = copy_matrix_host_to_device(mat_a);
+  Matrix* d_mat_b = copy_matrix_host_to_device(mat_b);
+  Matrix* d_result = gpu_matrix_add(d_mat_a, d_mat_b, 2, 2);
   Matrix* result = copy_matrix_device_to_host(d_result);
 
   cr_assert_not_null(result);
@@ -410,102 +435,103 @@ Test(GPU_Matrix, Add_SmallMatrix) {
   cr_assert_eq(result->cols, 2);
 
   float expected[] = {6, 8, 10, 12};  // 2x2
-  for (int i = 0; i < 4; ++i) {
+  for (size_t i = 0; i < 4; ++i) {
     cr_assert_float_eq(result->elements[i], expected[i], 1e-5);
   }
 
-  free_matrix_host(A);
-  free_matrix_host(B);
+  free_matrix_host(mat_a);
+  free_matrix_host(mat_b);
   free_matrix_host(result);
-  free_matrix_device(d_A);
-  free_matrix_device(d_B);
+  free_matrix_device(d_mat_a);
+  free_matrix_device(d_mat_b);
   free_matrix_device(d_result);
 }
 
 // Test adding negative elements on GPU
 Test(GPU_Matrix, MatrixAdd_NegativeElements) {
-  Matrix* A = create_matrix_host(1, 3);
-  Matrix* B = create_matrix_host(1, 3);
+  Matrix* mat_a = create_matrix_host(1, 3);
+  Matrix* mat_b = create_matrix_host(1, 3);
   float vals_a[] = {-1, 2, -3};
   float vals_b[] = {4, -5, 6};
-  for (int i = 0; i < 3; ++i) {
-    A->elements[i] = vals_a[i];
-    B->elements[i] = vals_b[i];
+  for (size_t i = 0; i < 3; ++i) {
+    mat_a->elements[i] = vals_a[i];
+    mat_b->elements[i] = vals_b[i];
   }
-  Matrix* d_A = copy_matrix_host_to_device(A);
-  Matrix* d_B = copy_matrix_host_to_device(B);
-  Matrix* d_result = gpu_matrix_add(d_A, d_B, 1, 3);
+  Matrix* d_mat_a = copy_matrix_host_to_device(mat_a);
+  Matrix* d_mat_b = copy_matrix_host_to_device(mat_b);
+  Matrix* d_result = gpu_matrix_add(d_mat_a, d_mat_b, 1, 3);
   Matrix* result = copy_matrix_device_to_host(d_result);
 
   cr_assert_not_null(result);
   float expected[] = {3, -3, 3};
-  for (int i = 0; i < 3; ++i) {
+  for (size_t i = 0; i < 3; ++i) {
     cr_assert_float_eq(result->elements[i], expected[i], 1e-5);
   }
 
-  free_matrix_host(A);
-  free_matrix_host(B);
+  free_matrix_host(mat_a);
+  free_matrix_host(mat_b);
   free_matrix_host(result);
-  free_matrix_device(d_A);
-  free_matrix_device(d_B);
+  free_matrix_device(d_mat_a);
+  free_matrix_device(d_mat_b);
   free_matrix_device(d_result);
 }
 
 // Test adding matrices with different dimension on GPU
 Test(GPU_Matrix, MatrixAdd_DimensionMismatch) {
-  Matrix* A = create_matrix_host(2, 2);
-  Matrix* B = create_matrix_host(3, 2);  // Different dimensions
+  Matrix* mat_a = create_matrix_host(2, 2);
+  Matrix* mat_b = create_matrix_host(3, 2);  // Different dimensions
 
-  Matrix* result = gpu_matrix_add(A, B, 2, 2);
+  Matrix* result = gpu_matrix_add(mat_a, mat_b, 2, 2);
 
   cr_assert_null(result);
 
-  free_matrix_host(A);
-  free_matrix_host(B);
+  free_matrix_host(mat_a);
+  free_matrix_host(mat_b);
 }
 
 // Test adding large matrix on GPU
 Test(GPU_Matrix, MatrixAdd_LargeMatrix) {
-  int rows = 1000, cols = 1000;
-  Matrix* A = create_matrix_host(rows, cols);
-  Matrix* B = create_matrix_host(rows, cols);
+  size_t rows = 1000;
+  size_t cols = 1000;
+  Matrix* mat_a = create_matrix_host(rows, cols);
+  Matrix* mat_b = create_matrix_host(rows, cols);
 
-  for (int i = 0; i < rows * cols; ++i) {
-    A->elements[i] = 2.0f;
-    B->elements[i] = 5.0f;
+  for (size_t i = 0; i < rows * cols; ++i) {
+    mat_a->elements[i] = 2.0F;
+    mat_b->elements[i] = 5.0F;
   }
-  Matrix* d_A = copy_matrix_host_to_device(A);
-  Matrix* d_B = copy_matrix_host_to_device(B);
-  Matrix* d_result = gpu_matrix_add(d_A, d_B, rows, cols);
+  Matrix* d_mat_a = copy_matrix_host_to_device(mat_a);
+  Matrix* d_mat_b = copy_matrix_host_to_device(mat_b);
+  Matrix* d_result = gpu_matrix_add(d_mat_a, d_mat_b, rows, cols);
   Matrix* result = copy_matrix_device_to_host(d_result);
 
   cr_assert_not_null(result);
-  for (int i = 0; i < rows * cols; ++i) {
-    cr_assert_float_eq(result->elements[i], 7.0f, 1e-5);
+  for (size_t i = 0; i < rows * cols; ++i) {
+    cr_assert_float_eq(result->elements[i], 7.0F, 1e-5);
   }
 
-  free_matrix_host(A);
-  free_matrix_host(B);
+  free_matrix_host(mat_a);
+  free_matrix_host(mat_b);
   free_matrix_host(result);
-  free_matrix_device(d_A);
-  free_matrix_device(d_B);
+  free_matrix_device(d_mat_a);
+  free_matrix_device(d_mat_b);
   free_matrix_device(d_result);
 }
 
 // Test small-sized matrix subtraction on GPU
 Test(GPU_Matrix, Subtract_SmallMatrix) {
-  Matrix* A = create_matrix_host(2, 2);
-  Matrix* B = create_matrix_host(2, 2);
+  Matrix* mat_a = create_matrix_host(2, 2);
+  Matrix* mat_b = create_matrix_host(2, 2);
 
-  float valuesA[] = {5, 6, 7, 8};  // 2x2
-  float valuesB[] = {1, 2, 3, 4};  // 2x2
-  for (int i = 0; i < 4; ++i) {
-    A->elements[i] = valuesA[i];
-    B->elements[i] = valuesB[i];
+  float values_a[] = {5, 6, 7, 8};  // 2x2
+  float values_b[] = {1, 2, 3, 4};  // 2x2
+  for (size_t i = 0; i < 4; ++i) {
+    mat_a->elements[i] = values_a[i];
+    mat_b->elements[i] = values_b[i];
   }
-  Matrix* d_A = copy_matrix_host_to_device(A);
-  Matrix* d_B = copy_matrix_host_to_device(B);
-  Matrix* d_result = gpu_matrix_subtract(d_A, d_B, 2, 2);
+  Matrix* d_mat_a = copy_matrix_host_to_device(mat_a);
+  Matrix* d_mat_b = copy_matrix_host_to_device(mat_b);
+  Matrix* d_result = gpu_matrix_subtract(d_mat_a, d_mat_b, 2, 2);
   Matrix* result = copy_matrix_device_to_host(d_result);
 
   cr_assert_not_null(result);
@@ -513,81 +539,82 @@ Test(GPU_Matrix, Subtract_SmallMatrix) {
   cr_assert_eq(result->cols, 2);
 
   float expected[] = {4, 4, 4, 4};  // 2x2
-  for (int i = 0; i < 4; ++i) {
+  for (size_t i = 0; i < 4; ++i) {
     cr_assert_float_eq(result->elements[i], expected[i], 1e-5);
   }
 
-  free_matrix_host(A);
-  free_matrix_host(B);
+  free_matrix_host(mat_a);
+  free_matrix_host(mat_b);
   free_matrix_host(result);
-  free_matrix_device(d_A);
-  free_matrix_device(d_B);
+  free_matrix_device(d_mat_a);
+  free_matrix_device(d_mat_b);
   free_matrix_device(d_result);
 }
 
 // Test subtracting negative elements on GPU
 Test(GPU_Matrix, MatrixSubtract_NegativeResults) {
-  Matrix* A = create_matrix_host(1, 2);
-  Matrix* B = create_matrix_host(1, 2);
-  A->elements[0] = 2;
-  A->elements[1] = 3;
-  B->elements[0] = 5;
-  B->elements[1] = 1;
-  Matrix* d_A = copy_matrix_host_to_device(A);
-  Matrix* d_B = copy_matrix_host_to_device(B);
-  Matrix* d_result = gpu_matrix_subtract(d_A, d_B, 1, 2);
+  Matrix* mat_a = create_matrix_host(1, 2);
+  Matrix* mat_b = create_matrix_host(1, 2);
+  mat_a->elements[0] = 2;
+  mat_a->elements[1] = 3;
+  mat_b->elements[0] = 5;
+  mat_b->elements[1] = 1;
+  Matrix* d_mat_a = copy_matrix_host_to_device(mat_a);
+  Matrix* d_mat_b = copy_matrix_host_to_device(mat_b);
+  Matrix* d_result = gpu_matrix_subtract(d_mat_a, d_mat_b, 1, 2);
   Matrix* result = copy_matrix_device_to_host(d_result);
 
   cr_assert_not_null(result);
-  cr_assert_float_eq(result->elements[0], -3.0f, 1e-5);
-  cr_assert_float_eq(result->elements[1], 2.0f, 1e-5);
+  cr_assert_float_eq(result->elements[0], -3.0F, 1e-5);
+  cr_assert_float_eq(result->elements[1], 2.0F, 1e-5);
 
-  free_matrix_host(A);
-  free_matrix_host(B);
+  free_matrix_host(mat_a);
+  free_matrix_host(mat_b);
   free_matrix_host(result);
-  free_matrix_device(d_A);
-  free_matrix_device(d_B);
+  free_matrix_device(d_mat_a);
+  free_matrix_device(d_mat_b);
   free_matrix_device(d_result);
 }
 
 // Test subtracting matrices with different dimensions on GPU
 Test(GPU_Matrix, MatrixSubtract_DimensionMismatch) {
-  Matrix* a = create_matrix_host(2, 2);
-  Matrix* b = create_matrix_host(2, 3);  // Incompatible dimensions
+  Matrix* mat_a = create_matrix_host(2, 2);
+  Matrix* mat_b = create_matrix_host(2, 3);  // Incompatible dimensions
 
-  Matrix* result = gpu_matrix_subtract(a, b, 2, 3);
+  Matrix* result = gpu_matrix_subtract(mat_a, mat_b, 2, 3);
 
   cr_assert_null(result);
 
-  free_matrix_host(a);
-  free_matrix_host(b);
+  free_matrix_host(mat_a);
+  free_matrix_host(mat_b);
 }
 
 // Test subtracting large matrix on GPU
 Test(GPU_Matrix, MatrixSubtract_LargeMatrix) {
-  int rows = 1000, cols = 1000;
-  Matrix* A = create_matrix_host(rows, cols);
-  Matrix* B = create_matrix_host(rows, cols);
+  size_t rows = 1000;
+  size_t cols = 1000;
+  Matrix* mat_a = create_matrix_host(rows, cols);
+  Matrix* mat_b = create_matrix_host(rows, cols);
 
-  for (int i = 0; i < rows * cols; ++i) {
-    A->elements[i] = 10.0f;
-    B->elements[i] = 1.0f;
+  for (size_t i = 0; i < rows * cols; ++i) {
+    mat_a->elements[i] = 10.0F;
+    mat_b->elements[i] = 1.0F;
   }
-  Matrix* d_A = copy_matrix_host_to_device(A);
-  Matrix* d_B = copy_matrix_host_to_device(B);
-  Matrix* d_result = gpu_matrix_subtract(d_A, d_B, rows, cols);
+  Matrix* d_mat_a = copy_matrix_host_to_device(mat_a);
+  Matrix* d_mat_b = copy_matrix_host_to_device(mat_b);
+  Matrix* d_result = gpu_matrix_subtract(d_mat_a, d_mat_b, rows, cols);
   Matrix* result = copy_matrix_device_to_host(d_result);
 
   cr_assert_not_null(result);
-  for (int i = 0; i < rows * cols; ++i) {
-    cr_assert_float_eq(result->elements[i], 9.0f, 1e-5);
+  for (size_t i = 0; i < rows * cols; ++i) {
+    cr_assert_float_eq(result->elements[i], 9.0F, 1e-5);
   }
 
-  free_matrix_host(A);
-  free_matrix_host(B);
+  free_matrix_host(mat_a);
+  free_matrix_host(mat_b);
   free_matrix_host(result);
-  free_matrix_device(d_A);
-  free_matrix_device(d_B);
+  free_matrix_device(d_mat_a);
+  free_matrix_device(d_mat_b);
   free_matrix_device(d_result);
 }
 

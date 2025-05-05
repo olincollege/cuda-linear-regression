@@ -77,7 +77,7 @@ Matrix* gpu_scalar_multiply(const Matrix* d_input, float scalar,
  * @param scalar The scalar multiplier.
  * @param output Pointer to the result matrix.
  */
-__global__ void scalar_multiply_kernel(const Matrix* input, const float scalar,
+__global__ void scalar_multiply_kernel(const Matrix* input, float scalar,
                                        Matrix* output);
 
 /**
