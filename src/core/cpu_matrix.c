@@ -7,18 +7,23 @@
 const float ZERO_THRESH = (float)1e-7;
 
 Matrix* cpu_matrix_multiply(const Matrix* left_mat, const Matrix* right_mat) {
-  if (!left_mat || !right_mat || !left_mat->elements || !right_mat->elements)
+  if (!left_mat || !right_mat || !left_mat->elements || !right_mat->elements) {
     return NULL;
+  }
 
-  if (left_mat->cols != right_mat->rows) return NULL;
+  if (left_mat->cols != right_mat->rows) {
+    return NULL;
+  }
 
   Matrix* result = create_matrix_host(left_mat->rows, right_mat->cols);
-  if (!result) return NULL;
+  if (!result) {
+    return NULL;
+  }
 
-  for (int i = 0; i < left_mat->rows; ++i) {
-    for (int j = 0; j < right_mat->cols; ++j) {
-      float sum = 0.0f;
-      for (int k = 0; k < left_mat->cols; ++k) {
+  for (size_t i = 0; i < left_mat->rows; ++i) {
+    for (size_t j = 0; j < right_mat->cols; ++j) {
+      float sum = 0.0F;
+      for (size_t k = 0; k < left_mat->cols; ++k) {
         sum += left_mat->elements[i * left_mat->cols + k] *
                right_mat->elements[k * right_mat->cols + j];
       }
@@ -30,13 +35,17 @@ Matrix* cpu_matrix_multiply(const Matrix* left_mat, const Matrix* right_mat) {
 }
 
 Matrix* cpu_matrix_transpose(const Matrix* mat) {
-  if (!mat || !mat->elements) return NULL;
+  if (!mat || !mat->elements) {
+    return NULL;
+  }
 
   Matrix* transposed = create_matrix_host(mat->cols, mat->rows);
-  if (!transposed) return NULL;
+  if (!transposed) {
+    return NULL;
+  }
 
-  for (int i = 0; i < mat->rows; ++i) {
-    for (int j = 0; j < mat->cols; ++j) {
+  for (size_t i = 0; i < mat->rows; ++i) {
+    for (size_t j = 0; j < mat->cols; ++j) {
       transposed->elements[j * transposed->cols + i] =
           mat->elements[i * mat->cols + j];
     }
@@ -71,8 +80,8 @@ int unzero_pivot(Matrix* input_mat, Matrix* inverse_mat,
     if (fabsf(input_mat->elements[pivot_row * dim + pivot_row]) < ZERO_THRESH) {
       return 0;
     }
-    return 1;
   }
+  return 1;
 }
 
 void eliminate_rows(Matrix* input_mat, Matrix* inverse_mat,
@@ -142,12 +151,16 @@ Matrix* cpu_matrix_inverse(const Matrix* mat) {
 }
 
 Matrix* cpu_scalar_multiply(const Matrix* mat, const float scalar) {
-  if (!mat || !mat->elements) return NULL;
+  if (!mat || !mat->elements) {
+    return NULL;
+  }
 
   Matrix* result = create_matrix_host(mat->rows, mat->cols);
-  if (!result) return NULL;
+  if (!result) {
+    return NULL;
+  }
 
-  for (int i = 0; i < mat->rows * mat->cols; ++i) {
+  for (size_t i = 0; i < mat->rows * mat->cols; ++i) {
     result->elements[i] = mat->elements[i] * scalar;
   }
 
@@ -155,14 +168,20 @@ Matrix* cpu_scalar_multiply(const Matrix* mat, const float scalar) {
 }
 
 Matrix* cpu_matrix_add(const Matrix* mat_a, const Matrix* mat_b) {
-  if (!mat_a || !mat_b || !mat_a->elements || !mat_b->elements) return NULL;
+  if (!mat_a || !mat_b || !mat_a->elements || !mat_b->elements) {
+    return NULL;
+  }
 
-  if (mat_a->rows != mat_b->rows || mat_a->cols != mat_b->cols) return NULL;
+  if (mat_a->rows != mat_b->rows || mat_a->cols != mat_b->cols) {
+    return NULL;
+  }
 
   Matrix* result = create_matrix_host(mat_a->rows, mat_a->cols);
-  if (!result) return NULL;
+  if (!result) {
+    return NULL;
+  }
 
-  for (int i = 0; i < mat_a->rows * mat_a->cols; ++i) {
+  for (size_t i = 0; i < mat_a->rows * mat_a->cols; ++i) {
     result->elements[i] = mat_a->elements[i] + mat_b->elements[i];
   }
 
@@ -170,14 +189,20 @@ Matrix* cpu_matrix_add(const Matrix* mat_a, const Matrix* mat_b) {
 }
 
 Matrix* cpu_matrix_subtract(const Matrix* mat_a, const Matrix* mat_b) {
-  if (!mat_a || !mat_b || !mat_a->elements || !mat_b->elements) return NULL;
+  if (!mat_a || !mat_b || !mat_a->elements || !mat_b->elements) {
+    return NULL;
+  }
 
-  if (mat_a->rows != mat_b->rows || mat_a->cols != mat_b->cols) return NULL;
+  if (mat_a->rows != mat_b->rows || mat_a->cols != mat_b->cols) {
+    return NULL;
+  }
 
   Matrix* result = create_matrix_host(mat_a->rows, mat_a->cols);
-  if (!result) return NULL;
+  if (!result) {
+    return NULL;
+  }
 
-  for (int i = 0; i < mat_a->rows * mat_a->cols; ++i) {
+  for (size_t i = 0; i < mat_a->rows * mat_a->cols; ++i) {
     result->elements[i] = mat_a->elements[i] - mat_b->elements[i];
   }
 
