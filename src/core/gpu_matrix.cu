@@ -96,12 +96,6 @@ __global__ void scalar_multiply_kernel(const Matrix* input, float scalar,
 
 Matrix* gpu_scalar_multiply(const Matrix* d_input, float scalar,
                             size_t out_rows, size_t out_cols) {
-
-  // // Ensure out_rows and out_cols are equal to d_input's rows and cols
-  // if (d_input->rows != out_rows || d_input->cols != out_cols) {
-  //   printf("Error: Output dimensions do not match input dimensions.\n");
-  //   return nullptr;
-  // }
   int total_elements = out_rows * out_cols;
   int threads_per_block = 256;
   int blocks = (total_elements + threads_per_block - 1) / threads_per_block;
@@ -117,7 +111,11 @@ Matrix* gpu_scalar_multiply(const Matrix* d_input, float scalar,
 }
 
 __global__ void matrix_add_kernel(const Matrix* mat_a, const Matrix* mat_b,
-                                  Matrix* result) {
+                                  Matrix* result, bool* error_flag) {
+  if (mat_a-> cols != mat_b-> cols || mat_a-> rows != mat_b-> rows){
+    *error_flag = true;
+    return;
+  }                            
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   int total_elements = mat_a->rows * mat_a->cols;
 
@@ -134,15 +132,33 @@ Matrix* gpu_matrix_add(const Matrix* d_a, const Matrix* d_b, size_t out_rows,
 
   Matrix* d_result = create_matrix_device(out_rows, out_cols);
 
-  matrix_add_kernel<<<blocks, threads_per_block>>>(d_a, d_b, d_result);
+  bool* d_error_flag;
+  cudaMalloc(&d_error_flag, sizeof(bool));
+  cudaMemset(d_error_flag, 0, sizeof(bool));
+
+  matrix_add_kernel<<<blocks, threads_per_block>>>(d_a, d_b, d_result, d_error_flag);
   check_device_error("matrix_add_kernel", cudaGetLastError());
   cudaDeviceSynchronize();
+
+    bool error_flag = false;
+  cudaMemcpy(&error_flag, d_error_flag, sizeof(bool), cudaMemcpyDeviceToHost);
+  cudaFree(d_error_flag);
+
+  if (error_flag){
+    fprintf(stderr, "Matrix dimension mismatch\n");
+    return nullptr;
+  }
 
   return d_result;
 }
 
 __global__ void matrix_subtract_kernel(const Matrix* mat_a, const Matrix* mat_b,
-                                       Matrix* result) {
+                                       Matrix* result, bool* error_flag) {
+  if (mat_a-> cols != mat_b-> cols || mat_a-> rows != mat_b-> rows){
+    *error_flag = true;
+    return;
+  }  
+  
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   int total_elements = mat_a->rows * mat_a->cols;
 
@@ -159,9 +175,22 @@ Matrix* gpu_matrix_subtract(const Matrix* d_a, const Matrix* d_b,
   int blocks = (total_elements + threads_per_block - 1) / threads_per_block;
   Matrix* d_result = create_matrix_device(out_rows, out_cols);
 
-  matrix_subtract_kernel<<<blocks, threads_per_block>>>(d_a, d_b, d_result);
+  bool* d_error_flag;
+  cudaMalloc(&d_error_flag, sizeof(bool));
+  cudaMemset(d_error_flag, 0, sizeof(bool));
+
+  matrix_subtract_kernel<<<blocks, threads_per_block>>>(d_a, d_b, d_result, d_error_flag);
   check_device_error("matrix_subtract_kernel", cudaGetLastError());
   cudaDeviceSynchronize();
+  
+  bool error_flag = false;
+  cudaMemcpy(&error_flag, d_error_flag, sizeof(bool), cudaMemcpyDeviceToHost);
+  cudaFree(d_error_flag);
+
+  if (error_flag){
+    fprintf(stderr, "Matrix dimension mismatch\n");
+    return nullptr;
+  }
 
   return d_result;
 }
