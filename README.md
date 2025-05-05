@@ -60,7 +60,7 @@ Note 2: For your computer to find NVCC, you may need to add it to your PATH usin
 
 Clone the repository:
 ```bash
-$ git clone https://github.com/olincollege/cuda-neural-network.git
+$ git clone https://github.com/olincollege/cuda-linear-regression.git
 ```
 Build it with:
 ```bash
