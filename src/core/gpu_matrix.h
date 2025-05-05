@@ -13,6 +13,10 @@ extern "C" {
 /**
  * Multiply two matrices using the GPU.
  *
+ * Dynamically allocates a third matrix for the result on GPU. The caller is
+ * responsible for cleaning up this memory. If the matrices are incompatible for
+ * multiplication, a null pointer is returned.
+ *
  * @param d_left Pointer to device memory for left matrix.
  * @param d_right Pointer to device memory for right matrix.
  * @param out_rows The number of rows of the output matrix.
@@ -40,6 +44,9 @@ __global__ void matrix_multiply_kernel(const Matrix* left_mat,
 /**
  * Transpose a matrix using the GPU.
  *
+ * Dynamically allocates a third matrix for the result on GPU. The caller is
+ * responsible for cleaning up this memory.
+ *
  * @param d_input Pointer to device memory for input matrix.
  * @param out_rows The number of rows of the output matrix.
  * @param out_cols The number of cols of the output matrix.
@@ -60,6 +67,9 @@ __global__ void matrix_transpose_kernel(const Matrix* input, Matrix* output);
 /**
  * Multiply every element of a matrix by a scalar value on the GPU.
  *
+ * Dynamically allocates a third matrix for the result on GPU. The caller is
+ * responsible for cleaning up this memory.
+ *
  * @param d_input Pointer to device memory for input matrix.
  * @param scalar Scalar multiplier.
  * @param out_rows The number of rows of the output matrix.
@@ -77,11 +87,15 @@ Matrix* gpu_scalar_multiply(const Matrix* d_input, float scalar,
  * @param scalar The scalar multiplier.
  * @param output Pointer to the result matrix.
  */
-__global__ void scalar_multiply_kernel(const Matrix* input, const float scalar,
+__global__ void scalar_multiply_kernel(const Matrix* input, float scalar,
                                        Matrix* output);
 
 /**
  * Add two matrices element-wise using the GPU.
+ *
+ * Dynamically allocates a third matrix for the result on GPU. The caller is
+ * responsible for cleaning up this memory. If the matrices are incompatible for
+ * multiplication, a null pointer is returned.
  *
  * @param d_a Pointer to device memory for first matrix.
  * @param d_b Pointer to device memory for second matrix.
@@ -105,6 +119,11 @@ __global__ void matrix_add_kernel(const Matrix* mat_a, const Matrix* mat_b,
 
 /**
  * Subtract one matrix from another element-wise using the GPU.
+ *
+ * Dynamically allocates a third matrix for the result on GPU. The caller is
+ * responsible for cleaning up this memory. If the matrices are incompatible for
+ * multiplication, a null pointer is returned.
+ *
  * @param d_a Pointer to device memory for first matrix.
  * @param d_b Pointer to device memory for second matrix.
  * @param out_rows The number of rows of the output matrix.
