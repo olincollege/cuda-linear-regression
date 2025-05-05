@@ -9,7 +9,11 @@
  */
 __global__ void matrix_multiply_kernel(const Matrix* left_mat,
                                        const Matrix* right_mat,
-                                       Matrix* result) {
+                                       Matrix* result, bool* error_flag) {
+  if (left_mat-> cols != right_mat-> rows){
+    *error_flag = true;
+    return;
+  }
   int row = blockIdx.y * blockDim.y + threadIdx.y;
   int col = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -32,13 +36,26 @@ Matrix* gpu_matrix_multiply(const Matrix* d_left, const Matrix* d_right,
   // Set up kernel launch dimensions
   dim3 blockDim(16, 16);
   dim3 gridDim((out_cols + 15) / 16, (out_rows + 15) / 16);
-
   Matrix* d_result = create_matrix_device(out_rows, out_cols);
+  
+  bool* d_error_flag;
+  cudaMalloc(&d_error_flag, sizeof(bool));
+  cudaMemset(d_error_flag, 0, sizeof(bool));
+
 
   // Launch kernel
-  matrix_multiply_kernel<<<gridDim, blockDim>>>(d_left, d_right, d_result);
+  matrix_multiply_kernel<<<gridDim, blockDim>>>(d_left, d_right, d_result, d_error_flag);
   check_device_error("Kernel launch failed", cudaGetLastError());
   cudaDeviceSynchronize();
+
+  bool error_flag = false;
+  cudaMemcpy(&error_flag, d_error_flag, sizeof(bool), cudaMemcpyDeviceToHost);
+  cudaFree(d_error_flag);
+
+  if (error_flag){
+    fprintf(stderr, "Matrix dimension mismatch\n");
+    return nullptr;
+  }
   return d_result;
 }
 
@@ -79,7 +96,13 @@ __global__ void scalar_multiply_kernel(const Matrix* input, float scalar,
 
 Matrix* gpu_scalar_multiply(const Matrix* d_input, float scalar,
                             size_t out_rows, size_t out_cols) {
-  int total_elements = d_input->rows * d_input->cols;
+
+  // // Ensure out_rows and out_cols are equal to d_input's rows and cols
+  // if (d_input->rows != out_rows || d_input->cols != out_cols) {
+  //   printf("Error: Output dimensions do not match input dimensions.\n");
+  //   return nullptr;
+  // }
+  int total_elements = out_rows * out_cols;
   int threads_per_block = 256;
   int blocks = (total_elements + threads_per_block - 1) / threads_per_block;
 

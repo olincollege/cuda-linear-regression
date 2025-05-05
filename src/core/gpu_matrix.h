@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #pragma once
 
 #include <cuda_runtime.h>
@@ -15,10 +17,12 @@ extern "C" {
  * @param d_right Pointer to device memory for right matrix.
  * @param out_rows The number of rows of the output matrix.
  * @param out_cols The number of cols of the output matrix.
- * 
- * @return Pointer to the product of the two matrices or NULL if operation not feasible
+ *
+ * @return Pointer to the product of the two matrices or NULL if operation not
+ * feasible
  */
-Matrix* gpu_matrix_multiply(const Matrix* d_left, const Matrix* d_right, size_t out_rows, size_t out_cols);
+Matrix* gpu_matrix_multiply(const Matrix* d_left, const Matrix* d_right,
+                            size_t out_rows, size_t out_cols);
 
 /**
  * Kernel to run part of matrix multiplication.
@@ -26,22 +30,24 @@ Matrix* gpu_matrix_multiply(const Matrix* d_left, const Matrix* d_right, size_t 
  * @param left_mat Pointer to left matrix in multiplication.
  * @param right_mat Pointer to right matrix in multiplication.
  * @param result Pointer to result matrix in multiplication.
+ * @param error_flag Pointer to a boolean value indicating whether an error
+ * occurred in the kernel
  */
 __global__ void matrix_multiply_kernel(const Matrix* left_mat,
-                                       const Matrix* right_mat, Matrix* result);
+                                       const Matrix* right_mat, Matrix* result,
+                                       bool* error_flag);
 
 /**
  * Transpose a matrix using the GPU.
- * 
+ *
  * @param d_input Pointer to device memory for input matrix.
  * @param out_rows The number of rows of the output matrix.
  * @param out_cols The number of cols of the output matrix.
- * 
- * @return Pointer to the transposed matrix. 
+ *
+ * @return Pointer to the transposed matrix.
  */
-Matrix* gpu_matrix_transpose(const Matrix* d_input, size_t out_rows, size_t out_cols);
-
-
+Matrix* gpu_matrix_transpose(const Matrix* d_input, size_t out_rows,
+                             size_t out_cols);
 
 /**
  * Kernel to perform matrix transposition.
@@ -53,16 +59,16 @@ __global__ void matrix_transpose_kernel(const Matrix* input, Matrix* output);
 
 /**
  * Multiply every element of a matrix by a scalar value on the GPU.
- * 
+ *
  * @param d_input Pointer to device memory for input matrix.
  * @param scalar Scalar multiplier.
  * @param out_rows The number of rows of the output matrix.
  * @param out_cols The number of cols of the output matrix.
- * 
- * @return Pointer to the product of the matrix and scalar value. 
+ *
+ * @return Pointer to the product of the matrix and scalar value.
  */
-Matrix* gpu_scalar_multiply(const Matrix* d_input, float scalar, size_t out_rows, size_t out_cols);
-
+Matrix* gpu_scalar_multiply(const Matrix* d_input, float scalar,
+                            size_t out_rows, size_t out_cols);
 
 /**
  * Kernel to perform element-wise scalar multiplication.
@@ -81,10 +87,11 @@ __global__ void scalar_multiply_kernel(const Matrix* input, const float scalar,
  * @param d_b Pointer to device memory for second matrix.
  * @param out_rows The number of rows of the output matrix.
  * @param out_cols The number of cols of the output matrix.
- * 
- * @return Pointer to the sum of the two matrices. 
+ *
+ * @return Pointer to the sum of the two matrices.
  */
-Matrix* gpu_matrix_add(const Matrix* d_a, const Matrix* d_b, size_t out_rows, size_t out_cols);
+Matrix* gpu_matrix_add(const Matrix* d_a, const Matrix* d_b, size_t out_rows,
+                       size_t out_cols);
 
 /**
  * Kernel to perform element-wise matrix addition.
@@ -102,10 +109,11 @@ __global__ void matrix_add_kernel(const Matrix* mat_a, const Matrix* mat_b,
  * @param d_b Pointer to device memory for second matrix.
  * @param out_rows The number of rows of the output matrix.
  * @param out_cols The number of cols of the output matrix.
- * 
- * @return Pointer to the transposed matrix. 
+ *
+ * @return Pointer to the transposed matrix.
  */
-Matrix* gpu_matrix_subtract(const Matrix* d_a, const Matrix* d_b, size_t out_rows, size_t out_cols);
+Matrix* gpu_matrix_subtract(const Matrix* d_a, const Matrix* d_b,
+                            size_t out_rows, size_t out_cols);
 
 /**
  * Kernel to perform element-wise matrix subtraction.

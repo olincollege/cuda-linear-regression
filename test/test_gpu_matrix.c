@@ -99,25 +99,22 @@ Test(GPU_Matrix, Multiply_ZeroMatrix) {
 }
 
 // Test invalid matrix multiplication on GPU
-// Test(GPU_Matrix, Multiply_MismatchedDimensions) {
-//   Matrix* A = create_matrix_host(2, 3);
-//   Matrix* B = create_matrix_host(4, 2);  // incompatible
+Test(GPU_Matrix, Multiply_MismatchedDimensions) {
+  Matrix* A = create_matrix_host(2, 3);
+  Matrix* B = create_matrix_host(4, 2);  // incompatible
 
-//   Matrix* d_A = copy_matrix_host_to_device(A);
-//   Matrix* d_B = copy_matrix_host_to_device(B);
+  Matrix* d_A = copy_matrix_host_to_device(A);
+  Matrix* d_B = copy_matrix_host_to_device(B);
 
-//   Matrix* d_result = gpu_matrix_multiply(d_A, d_B, 2, 2);
-//   Matrix* result = copy_matrix_device_to_host(d_result);
+  Matrix* d_result = gpu_matrix_multiply(d_A, d_B, 2, 2);
 
-//   cr_assert_null(result);
+  cr_assert_null(d_result);
 
-//   free_matrix_host(A);
-//   free_matrix_host(B);
-//   free_matrix_host(result);
-//   free_matrix_device(d_A);
-//   free_matrix_device(d_B);
-//   free_matrix_device(d_result);
-// }
+  free_matrix_host(A);
+  free_matrix_host(B);
+  free_matrix_device(d_A);
+  free_matrix_device(d_B);
+}
 
 // Test large matrix multiplication on GPU
 Test(GPU_Matrix, Multiply_LargeMatrix) {
@@ -372,7 +369,7 @@ Test(GPU_Matrix, ScalarMultiply_Negative) {
 
 // // Test scalar multiply when input is null on GPU
 // Test(GPU_Matrix, ScalarMultiply_NullInput) {
-//   Matrix* result = gpu_scalar_multiply(NULL, 2.0f);
+//   Matrix* result = gpu_scalar_multiply(NULL, 2.0f, 0, 0);
 
 //   cr_assert_null(result, "input matrix is NULL");
 // }
@@ -444,7 +441,7 @@ Test(GPU_Matrix, MatrixAdd_NegativeElements) {
   }
   Matrix* d_A = copy_matrix_host_to_device(A);
   Matrix* d_B = copy_matrix_host_to_device(B);
-  Matrix* d_result = gpu_matrix_add(A, B, 1, 3);
+  Matrix* d_result = gpu_matrix_add(d_A, d_B, 1, 3);
   Matrix* result = copy_matrix_device_to_host(d_result);
 
   cr_assert_not_null(result);
